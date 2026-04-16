@@ -52,6 +52,14 @@
         "MEMORYCHECK_COMMAND": "/usr/bin/valgrind",
         "MEMORYCHECK_COMMAND_OPTIONS": "--leak-check=full --error-exitcode=1 --show-leak-kinds=all --track-origins=yes"
       }
+    },
+    {
+      "name": "bench",
+      "displayName": "Benchmarks",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
     }
   ],
   "buildPresets": [
@@ -70,6 +78,10 @@
     {
       "name": "valgrind",
       "configurePreset": "valgrind"
+    },
+    {
+      "name": "bench",
+      "configurePreset": "bench"
     }
   ],
   "testPresets": [

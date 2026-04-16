@@ -4,6 +4,7 @@
   "description": "C++ Agentic AI Framework",
   "dependencies": [
     "nlohmann-json",
-    "catch2"
+    "catch2",
+    "benchmark"
   ]
 }

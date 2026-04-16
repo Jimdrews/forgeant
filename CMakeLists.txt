@@ -65,8 +65,13 @@ install(FILES
 )
 
 option(AGENTFORGE_BUILD_TESTS "Build tests" ${PROJECT_IS_TOP_LEVEL})
+option(AGENTFORGE_BUILD_BENCHMARKS "Build benchmarks" ${PROJECT_IS_TOP_LEVEL})
 
 if(AGENTFORGE_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(AGENTFORGE_BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
 endif()

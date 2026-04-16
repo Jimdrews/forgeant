@@ -41,6 +41,9 @@ jobs:
       - name: Test
         run: ctest --preset ci
 
+      - name: Build benchmarks
+        run: cmake --build --preset ci --target agentforge_benchmarks
+
   clang:
     name: Clang 18 (Ubuntu)
     runs-on: ubuntu-latest
