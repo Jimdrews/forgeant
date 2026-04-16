@@ -14,7 +14,7 @@ jobs:
     name: GCC 13 (Ubuntu)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install GCC 13
         run: |
@@ -44,7 +44,7 @@ jobs:
     name: Clang 18 (Ubuntu)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Clang 18
         run: |
@@ -72,7 +72,7 @@ jobs:
     name: AppleClang (macOS)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -92,7 +92,7 @@ jobs:
     name: ASan + UBSan (Clang 18)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Clang 18
         run: |
@@ -120,7 +120,7 @@ jobs:
     name: Valgrind Memcheck (GCC 13)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install GCC 13 and Valgrind
         run: |
@@ -148,7 +148,7 @@ jobs:
     name: clang-tidy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Clang 18 tools
         run: |
@@ -175,7 +175,7 @@ jobs:
     name: Format Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install clang-format
         run: |
