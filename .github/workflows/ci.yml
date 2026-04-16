@@ -8,6 +8,7 @@ on:
 
 env:
   VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   gcc:
