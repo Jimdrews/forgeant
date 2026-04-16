@@ -1,0 +1,9 @@
+{
+  "name": "agentforge",
+  "version": "0.1.0",
+  "description": "C++ Agentic AI Framework",
+  "dependencies": [
+    "nlohmann-json",
+    "catch2"
+  ]
+}
