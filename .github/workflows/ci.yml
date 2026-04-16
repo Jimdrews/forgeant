@@ -41,17 +41,15 @@ jobs:
         run: ctest --preset ci
 
   clang:
-    name: Clang 17 (Ubuntu)
+    name: Clang 18 (Ubuntu)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Clang 17
+      - name: Install Clang 18
         run: |
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
           sudo apt-get update
-          sudo apt-get install -y clang-17
+          sudo apt-get install -y clang-18
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -61,8 +59,8 @@ jobs:
       - name: Configure
         run: cmake --preset ci
         env:
-          CC: clang-17
-          CXX: clang++-17
+          CC: clang-18
+          CXX: clang++-18
 
       - name: Build
         run: cmake --build --preset ci
@@ -91,17 +89,15 @@ jobs:
         run: ctest --preset ci
 
   sanitizers:
-    name: ASan + UBSan (Clang 17)
+    name: ASan + UBSan (Clang 18)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Clang 17
+      - name: Install Clang 18
         run: |
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
           sudo apt-get update
-          sudo apt-get install -y clang-17
+          sudo apt-get install -y clang-18
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -111,8 +107,8 @@ jobs:
       - name: Configure
         run: cmake --preset asan
         env:
-          CC: clang-17
-          CXX: clang++-17
+          CC: clang-18
+          CXX: clang++-18
 
       - name: Build
         run: cmake --build --preset asan
@@ -146,9 +142,7 @@ jobs:
         run: cmake --build --preset valgrind
 
       - name: Memcheck
-        run: cd build/valgrind && ctest -T memcheck --output-on-failure
-        env:
-          VALGRIND_OPTS: "--leak-check=full --error-exitcode=1 --show-leak-kinds=all --track-origins=yes"
+        run: valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all --track-origins=yes build/valgrind/tests/agentforge_tests
 
   clang-tidy:
     name: clang-tidy
@@ -156,12 +150,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Clang 17 tools
+      - name: Install Clang 18 tools
         run: |
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
           sudo apt-get update
-          sudo apt-get install -y clang-17 clang-tidy-17
+          sudo apt-get install -y clang-18 clang-tidy-18
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -171,13 +163,13 @@ jobs:
       - name: Configure
         run: cmake --preset dev
         env:
-          CC: clang-17
-          CXX: clang++-17
+          CC: clang-18
+          CXX: clang++-18
 
       - name: Run clang-tidy
         run: |
           find include src -name '*.hpp' -o -name '*.cpp' | \
-            xargs clang-tidy-17 -p build/dev --warnings-as-errors='*'
+            xargs clang-tidy-18 -p build/dev --warnings-as-errors='*'
 
   format-check:
     name: Format Check
@@ -187,12 +179,10 @@ jobs:
 
       - name: Install clang-format
         run: |
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
           sudo apt-get update
-          sudo apt-get install -y clang-format-17
+          sudo apt-get install -y clang-format-18
 
       - name: Check formatting
         run: |
           find include src tests -name '*.hpp' -o -name '*.cpp' | \
-            xargs clang-format-17 --dry-run --Werror
+            xargs clang-format-18 --dry-run --Werror
