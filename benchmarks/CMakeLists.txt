@@ -6,6 +6,7 @@ add_executable(agentforge_benchmarks
     bench_message.cpp
     bench_http.cpp
     bench_provider.cpp
+    bench_tool.cpp
 )
 
 target_link_libraries(agentforge_benchmarks

@@ -11,7 +11,8 @@ AnthropicProvider::AnthropicProvider(HttpClient& client, ProviderConfig config)
     }
 }
 
-nlohmann::json AnthropicProvider::serialize_request(const Conversation& conversation) const {
+nlohmann::json AnthropicProvider::serialize_request(const Conversation& conversation,
+                                                    std::span<const nlohmann::json> tools) const {
     nlohmann::json request;
     request["model"] = config_.model;
     request["max_tokens"] = config_.max_tokens.value_or(1024);
@@ -42,6 +43,13 @@ nlohmann::json AnthropicProvider::serialize_request(const Conversation& conversa
         }
 
         messages.push_back(std::move(msg_json));
+    }
+
+    if (!tools.empty()) {
+        request["tools"] = nlohmann::json::array();
+        for (const auto& tool : tools) {
+            request["tools"].push_back(tool);
+        }
     }
 
     return request;
@@ -87,7 +95,12 @@ HttpHeaders AnthropicProvider::auth_headers() const {
 }
 
 LlmResponse AnthropicProvider::chat(const Conversation& conversation) {
-    auto request_body = serialize_request(conversation);
+    return chat(conversation, {});
+}
+
+LlmResponse AnthropicProvider::chat(const Conversation& conversation,
+                                    std::span<const nlohmann::json> tools) {
+    auto request_body = serialize_request(conversation, tools);
     auto http_response = client_.post(endpoint_url(), auth_headers(), request_body.dump());
 
     if (http_response.status_code < 200 || http_response.status_code >= 300) {

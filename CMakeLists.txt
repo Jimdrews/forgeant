@@ -18,6 +18,8 @@ add_library(agentforge
     src/http/curl_client.cpp
     src/provider/anthropic.cpp
     src/provider/openai.cpp
+    src/schema/schema.cpp
+    src/tool/registry.cpp
 )
 add_library(agentforge::agentforge ALIAS agentforge)
 

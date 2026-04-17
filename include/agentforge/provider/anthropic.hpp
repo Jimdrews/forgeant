@@ -12,6 +12,8 @@ class AnthropicProvider : public LlmProvider {
     AnthropicProvider(HttpClient& client, ProviderConfig config);
 
     LlmResponse chat(const Conversation& conversation) override;
+    LlmResponse chat(const Conversation& conversation,
+                     std::span<const nlohmann::json> tools) override;
 
   private:
     HttpClient& client_;
@@ -20,7 +22,9 @@ class AnthropicProvider : public LlmProvider {
     static constexpr const char* DEFAULT_BASE_URL = "https://api.anthropic.com";
     static constexpr const char* API_VERSION = "2023-06-01";
 
-    [[nodiscard]] nlohmann::json serialize_request(const Conversation& conversation) const;
+    [[nodiscard]] nlohmann::json
+    serialize_request(const Conversation& conversation,
+                      std::span<const nlohmann::json> tools = {}) const;
     [[nodiscard]] static LlmResponse deserialize_response(const nlohmann::json& json);
     [[nodiscard]] std::string endpoint_url() const;
     [[nodiscard]] HttpHeaders auth_headers() const;

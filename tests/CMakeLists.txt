@@ -10,6 +10,10 @@ add_executable(agentforge_tests
     test_http.cpp
     test_anthropic.cpp
     test_openai.cpp
+    test_schema.cpp
+    test_tool.cpp
+    test_registry.cpp
+    test_params_macro.cpp
 )
 
 target_link_libraries(agentforge_tests

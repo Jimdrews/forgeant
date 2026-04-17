@@ -4,6 +4,10 @@
 #include <agentforge/provider/response.hpp>
 #include <agentforge/types/conversation.hpp>
 
+#include <nlohmann/json.hpp>
+#include <span>
+#include <vector>
+
 namespace agentforge {
 
 class LlmProvider {
@@ -11,6 +15,8 @@ class LlmProvider {
     virtual ~LlmProvider() = default;
 
     virtual LlmResponse chat(const Conversation& conversation) = 0;
+    virtual LlmResponse chat(const Conversation& conversation,
+                             std::span<const nlohmann::json> tools) = 0;
 
     LlmProvider() = default;
     LlmProvider(const LlmProvider&) = delete;

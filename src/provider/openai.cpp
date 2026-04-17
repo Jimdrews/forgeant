@@ -11,7 +11,8 @@ OpenAiProvider::OpenAiProvider(HttpClient& client, ProviderConfig config)
     }
 }
 
-nlohmann::json OpenAiProvider::serialize_request(const Conversation& conversation) const {
+nlohmann::json OpenAiProvider::serialize_request(const Conversation& conversation,
+                                                 std::span<const nlohmann::json> tools) const {
     nlohmann::json request;
     request["model"] = config_.model;
 
@@ -51,6 +52,13 @@ nlohmann::json OpenAiProvider::serialize_request(const Conversation& conversatio
         }
 
         messages.push_back(std::move(msg_json));
+    }
+
+    if (!tools.empty()) {
+        request["tools"] = nlohmann::json::array();
+        for (const auto& tool : tools) {
+            request["tools"].push_back(tool);
+        }
     }
 
     return request;
@@ -114,7 +122,12 @@ HttpHeaders OpenAiProvider::auth_headers() const {
 }
 
 LlmResponse OpenAiProvider::chat(const Conversation& conversation) {
-    auto request_body = serialize_request(conversation);
+    return chat(conversation, {});
+}
+
+LlmResponse OpenAiProvider::chat(const Conversation& conversation,
+                                 std::span<const nlohmann::json> tools) {
+    auto request_body = serialize_request(conversation, tools);
     auto http_response = client_.post(endpoint_url(), auth_headers(), request_body.dump());
 
     if (http_response.status_code < 200 || http_response.status_code >= 300) {
