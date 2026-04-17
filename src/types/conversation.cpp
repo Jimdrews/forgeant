@@ -4,8 +4,8 @@ namespace agentforge {
 
 void to_json(nlohmann::json& j, const Conversation& conv) {
     j = {{"messages", nlohmann::json::array()}};
-    if (conv.system_prompt().has_value()) {
-        j["system_prompt"] = conv.system_prompt().value();
+    if (const auto& sp = conv.system_prompt()) {
+        j["system_prompt"] = *sp;
     }
     for (const auto& msg : conv.messages()) {
         j["messages"].push_back(msg);
