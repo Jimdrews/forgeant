@@ -7,6 +7,7 @@ project(agentforge
 )
 
 find_package(nlohmann_json REQUIRED)
+find_package(CURL REQUIRED)
 
 add_library(agentforge
     src/version.cpp
@@ -14,6 +15,7 @@ add_library(agentforge
     src/types/content.cpp
     src/types/message.cpp
     src/types/conversation.cpp
+    src/http/curl_client.cpp
 )
 add_library(agentforge::agentforge ALIAS agentforge)
 
@@ -28,6 +30,8 @@ target_include_directories(agentforge
 target_link_libraries(agentforge
     PUBLIC
         nlohmann_json::nlohmann_json
+    PRIVATE
+        CURL::libcurl
 )
 
 include(GNUInstallDirs)

@@ -5,6 +5,8 @@
   "dependencies": [
     "nlohmann-json",
     "catch2",
-    "benchmark"
+    "benchmark",
+    "curl",
+    "cpp-httplib"
   ]
 }

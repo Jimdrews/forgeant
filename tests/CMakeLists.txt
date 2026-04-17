@@ -1,4 +1,5 @@
 find_package(Catch2 3 REQUIRED)
+find_package(httplib REQUIRED)
 
 add_executable(agentforge_tests
     test_version.cpp
@@ -6,12 +7,14 @@ add_executable(agentforge_tests
     test_content.cpp
     test_message.cpp
     test_conversation.cpp
+    test_http.cpp
 )
 
 target_link_libraries(agentforge_tests
     PRIVATE
         agentforge::agentforge
         Catch2::Catch2WithMain
+        httplib::httplib
 )
 
 include(Catch)
