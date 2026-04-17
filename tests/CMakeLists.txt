@@ -2,6 +2,10 @@ find_package(Catch2 3 REQUIRED)
 
 add_executable(agentforge_tests
     test_version.cpp
+    test_role.cpp
+    test_content.cpp
+    test_message.cpp
+    test_conversation.cpp
 )
 
 target_link_libraries(agentforge_tests

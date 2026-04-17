@@ -10,6 +10,10 @@ find_package(nlohmann_json REQUIRED)
 
 add_library(agentforge
     src/version.cpp
+    src/types/role.cpp
+    src/types/content.cpp
+    src/types/message.cpp
+    src/types/conversation.cpp
 )
 add_library(agentforge::agentforge ALIAS agentforge)
 
