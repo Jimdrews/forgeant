@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_PROVIDER_PROVIDER_HPP
+#define AGENTFORGE_PROVIDER_PROVIDER_HPP
 
 #include <agentforge/provider/response.hpp>
 #include <agentforge/types/conversation.hpp>
@@ -19,3 +20,5 @@ class LlmProvider {
 };
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_PROVIDER_PROVIDER_HPP

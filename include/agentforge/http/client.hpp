@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_HTTP_CLIENT_HPP
+#define AGENTFORGE_HTTP_CLIENT_HPP
 
 #include <agentforge/http/response.hpp>
 
@@ -34,3 +35,5 @@ class HttpClient {
 };
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_HTTP_CLIENT_HPP

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_PROVIDER_ANTHROPIC_HPP
+#define AGENTFORGE_PROVIDER_ANTHROPIC_HPP
 
 #include <agentforge/http/client.hpp>
 #include <agentforge/provider/config.hpp>
@@ -26,3 +27,5 @@ class AnthropicProvider : public LlmProvider {
 };
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_PROVIDER_ANTHROPIC_HPP

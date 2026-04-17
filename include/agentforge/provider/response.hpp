@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_PROVIDER_RESPONSE_HPP
+#define AGENTFORGE_PROVIDER_RESPONSE_HPP
 
 #include <agentforge/types/message.hpp>
 
@@ -19,3 +20,5 @@ struct LlmResponse {
 };
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_PROVIDER_RESPONSE_HPP

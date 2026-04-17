@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_HTTP_RESPONSE_HPP
+#define AGENTFORGE_HTTP_RESPONSE_HPP
 
 #include <string>
 #include <unordered_map>
@@ -14,3 +15,5 @@ struct HttpResponse {
 };
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_HTTP_RESPONSE_HPP

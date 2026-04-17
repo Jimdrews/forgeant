@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_PROVIDER_OPENAI_HPP
+#define AGENTFORGE_PROVIDER_OPENAI_HPP
 
 #include <agentforge/http/client.hpp>
 #include <agentforge/provider/config.hpp>
@@ -25,3 +26,5 @@ class OpenAiProvider : public LlmProvider {
 };
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_PROVIDER_OPENAI_HPP

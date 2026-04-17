@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_TYPES_CONVERSATION_HPP
+#define AGENTFORGE_TYPES_CONVERSATION_HPP
 
 #include <agentforge/types/message.hpp>
 
@@ -33,3 +34,5 @@ void to_json(nlohmann::json& j, const Conversation& conv);
 void from_json(const nlohmann::json& j, Conversation& conv);
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_TYPES_CONVERSATION_HPP

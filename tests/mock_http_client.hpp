@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MOCK_HTTP_CLIENT_HPP
+#define MOCK_HTTP_CLIENT_HPP
 
 #include <agentforge/http/client.hpp>
 
@@ -34,3 +35,5 @@ class MockHttpClient : public HttpClient {
 };
 
 } // namespace agentforge::testing
+
+#endif // MOCK_HTTP_CLIENT_HPP

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_PROVIDER_CONFIG_HPP
+#define AGENTFORGE_PROVIDER_CONFIG_HPP
 
 #include <optional>
 #include <string>
@@ -14,3 +15,5 @@ struct ProviderConfig {
 };
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_PROVIDER_CONFIG_HPP

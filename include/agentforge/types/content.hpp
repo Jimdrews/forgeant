@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_TYPES_CONTENT_HPP
+#define AGENTFORGE_TYPES_CONTENT_HPP
 
 #include <nlohmann/json.hpp>
 #include <string>
@@ -54,3 +55,5 @@ void to_json(nlohmann::json& j, const ContentBlock& block);
 void from_json(const nlohmann::json& j, ContentBlock& block);
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_TYPES_CONTENT_HPP

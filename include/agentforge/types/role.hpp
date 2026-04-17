@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_TYPES_ROLE_HPP
+#define AGENTFORGE_TYPES_ROLE_HPP
 
 #include <cstdint>
 #include <nlohmann/json.hpp>
@@ -11,3 +12,5 @@ void to_json(nlohmann::json& j, Role role);
 void from_json(const nlohmann::json& j, Role& role);
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_TYPES_ROLE_HPP

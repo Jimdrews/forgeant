@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_HTTP_CURL_CLIENT_HPP
+#define AGENTFORGE_HTTP_CURL_CLIENT_HPP
 
 #include <agentforge/http/client.hpp>
 
@@ -41,3 +42,5 @@ class CurlHttpClient : public HttpClient {
 };
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_HTTP_CURL_CLIENT_HPP

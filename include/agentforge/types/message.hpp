@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_TYPES_MESSAGE_HPP
+#define AGENTFORGE_TYPES_MESSAGE_HPP
 
 #include <agentforge/types/content.hpp>
 #include <agentforge/types/role.hpp>
@@ -26,3 +27,5 @@ void to_json(nlohmann::json& j, const Message& msg);
 void from_json(const nlohmann::json& j, Message& msg);
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_TYPES_MESSAGE_HPP

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AGENTFORGE_VERSION_HPP
+#define AGENTFORGE_VERSION_HPP
 
 #include <string_view>
 
@@ -11,3 +12,5 @@ inline constexpr int VERSION_PATCH = 0;
 std::string_view version_string() noexcept;
 
 } // namespace agentforge
+
+#endif // AGENTFORGE_VERSION_HPP
