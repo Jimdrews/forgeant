@@ -8,6 +8,8 @@ add_executable(agentforge_tests
     test_message.cpp
     test_conversation.cpp
     test_http.cpp
+    test_anthropic.cpp
+    test_openai.cpp
 )
 
 target_link_libraries(agentforge_tests

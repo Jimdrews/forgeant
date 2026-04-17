@@ -16,6 +16,8 @@ add_library(agentforge
     src/types/message.cpp
     src/types/conversation.cpp
     src/http/curl_client.cpp
+    src/provider/anthropic.cpp
+    src/provider/openai.cpp
 )
 add_library(agentforge::agentforge ALIAS agentforge)
 
