@@ -20,6 +20,7 @@ add_library(agentforge
     src/provider/openai.cpp
     src/schema/schema.cpp
     src/tool/registry.cpp
+    src/structured/structured.cpp
 )
 add_library(agentforge::agentforge ALIAS agentforge)
 

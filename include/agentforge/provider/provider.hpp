@@ -17,6 +17,8 @@ class LlmProvider {
     virtual LlmResponse chat(const Conversation& conversation) = 0;
     virtual LlmResponse chat(const Conversation& conversation,
                              std::span<const nlohmann::json> tools) = 0;
+    virtual LlmResponse chat(const Conversation& conversation,
+                             const nlohmann::json& output_schema) = 0;
 
     LlmProvider() = default;
     LlmProvider(const LlmProvider&) = delete;

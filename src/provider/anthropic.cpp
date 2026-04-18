@@ -12,7 +12,8 @@ AnthropicProvider::AnthropicProvider(HttpClient& client, ProviderConfig config)
 }
 
 nlohmann::json AnthropicProvider::serialize_request(const Conversation& conversation,
-                                                    std::span<const nlohmann::json> tools) const {
+                                                    std::span<const nlohmann::json> tools,
+                                                    const nlohmann::json* output_schema) const {
     nlohmann::json request;
     request["model"] = config_.model;
     request["max_tokens"] = config_.max_tokens.value_or(1024);
@@ -50,6 +51,13 @@ nlohmann::json AnthropicProvider::serialize_request(const Conversation& conversa
         for (const auto& tool : tools) {
             request["tools"].push_back(tool);
         }
+    }
+
+    if (output_schema != nullptr) {
+        request["output_config"] = {
+            {"format",
+             {{"type", "json_schema"},
+              {"json_schema", {{"name", "response"}, {"schema", *output_schema}}}}}};
     }
 
     return request;
@@ -95,12 +103,37 @@ HttpHeaders AnthropicProvider::auth_headers() const {
 }
 
 LlmResponse AnthropicProvider::chat(const Conversation& conversation) {
-    return chat(conversation, {});
+    return chat(conversation, std::span<const nlohmann::json>{});
 }
 
 LlmResponse AnthropicProvider::chat(const Conversation& conversation,
                                     std::span<const nlohmann::json> tools) {
     auto request_body = serialize_request(conversation, tools);
+    auto http_response = client_.post(endpoint_url(), auth_headers(), request_body.dump());
+
+    if (http_response.status_code < 200 || http_response.status_code >= 300) {
+        std::string error_msg =
+            "Anthropic API error (HTTP " + std::to_string(http_response.status_code) + ")";
+        if (!http_response.body.empty()) {
+            try {
+                auto err_json = nlohmann::json::parse(http_response.body);
+                if (err_json.contains("error") && err_json["error"].contains("message")) {
+                    error_msg += ": " + err_json["error"]["message"].get<std::string>();
+                }
+            } catch (...) {
+                error_msg += ": " + http_response.body;
+            }
+        }
+        throw std::runtime_error(error_msg);
+    }
+
+    auto response_json = nlohmann::json::parse(http_response.body);
+    return deserialize_response(response_json);
+}
+
+LlmResponse AnthropicProvider::chat(const Conversation& conversation,
+                                    const nlohmann::json& output_schema) {
+    auto request_body = serialize_request(conversation, {}, &output_schema);
     auto http_response = client_.post(endpoint_url(), auth_headers(), request_body.dump());
 
     if (http_response.status_code < 200 || http_response.status_code >= 300) {
