@@ -198,3 +198,76 @@ TEST_CASE("Agent cumulative usage tracking", "[agent]") {
     REQUIRE(result.total_usage.output_tokens == 80);
     REQUIRE(result.iterations == 2);
 }
+
+TEST_CASE("Agent provider error returns error result", "[agent]") {
+    struct ErrorProvider : LlmProvider {
+        LlmResponse chat(const Conversation&) override {
+            throw std::runtime_error("connection timeout");
+        }
+        LlmResponse chat(const Conversation&, std::span<const nlohmann::json>) override {
+            throw std::runtime_error("connection timeout");
+        }
+        LlmResponse chat(const Conversation&, const nlohmann::json&) override {
+            throw std::runtime_error("connection timeout");
+        }
+    };
+
+    ErrorProvider provider;
+    Agent agent(provider);
+    auto result = agent.run("Hello");
+
+    REQUIRE(result.has_error());
+    REQUIRE(result.finish_reason == "error");
+    REQUIRE(result.error.find("connection timeout") != std::string::npos);
+}
+
+TEST_CASE("Agent error preserves iteration count and usage", "[agent]") {
+    MockProvider provider;
+    provider.responses.push(tool_call_response("1", "add", {{"a", 1}, {"b", 2}}, 100, 50));
+
+    struct ErrorAfterOneProvider : LlmProvider {
+        MockProvider& inner;
+        int call_count = 0;
+        explicit ErrorAfterOneProvider(MockProvider& m) : inner(m) {}
+        LlmResponse chat(const Conversation& c) override {
+            if (call_count++ > 0) {
+                throw std::runtime_error("timeout on second call");
+            }
+            return inner.chat(c);
+        }
+        LlmResponse chat(const Conversation& c, std::span<const nlohmann::json> t) override {
+            if (call_count++ > 0) {
+                throw std::runtime_error("timeout on second call");
+            }
+            return inner.chat(c, t);
+        }
+        LlmResponse chat(const Conversation&, const nlohmann::json&) override {
+            throw std::runtime_error("not used");
+        }
+    };
+
+    ErrorAfterOneProvider error_provider(provider);
+    Agent agent(error_provider);
+    agent.add_tool(make_tool<AddParams>("add", "Add", [](AddParams p) { return p.a + p.b; }));
+    auto result = agent.run("Add");
+
+    REQUIRE(result.has_error());
+    REQUIRE(result.iterations == 2);
+    REQUIRE(result.total_usage.input_tokens == 100);
+    REQUIRE(result.total_usage.output_tokens == 50);
+}
+
+TEST_CASE("Agent successful run has no error", "[agent]") {
+    MockProvider provider;
+    provider.responses.push(text_response("Hello!"));
+
+    Agent agent(provider);
+    auto result = agent.run("Hi");
+
+    REQUIRE(!result.has_error());
+    REQUIRE(result.error.empty());
+}
+
+TEST_CASE("Agent factory invalid provider still throws", "[agent]") {
+    REQUIRE_THROWS_AS(Agent::create("invalid", {.model = "x"}), std::invalid_argument);
+}

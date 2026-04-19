@@ -14,6 +14,9 @@ struct AgentResult {
     Usage total_usage;
     int iterations = 0;
     std::string finish_reason;
+    std::string error;
+
+    [[nodiscard]] bool has_error() const { return !error.empty(); }
 };
 
 } // namespace agentforge

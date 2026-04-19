@@ -6,6 +6,9 @@
 #include <agentforge/agent/result.hpp>
 #include <agentforge/http/client.hpp>
 #include <agentforge/provider/provider.hpp>
+#include <agentforge/schema/param_schema.hpp>
+#include <agentforge/structured/config.hpp>
+#include <agentforge/structured/structured.hpp>
 #include <agentforge/tool/registry.hpp>
 
 #include <memory>
@@ -23,6 +26,11 @@ class Agent {
 
     AgentResult run(const std::string& prompt);
     AgentResult chat(Conversation& conversation, const std::string& prompt);
+
+    template <typename T>
+    T structured(Conversation conversation, StructuredConfig config = {}) {
+        return agentforge::structured<T>(*provider_, std::move(conversation), config);
+    }
 
   private:
     std::unique_ptr<HttpClient> owned_http_;

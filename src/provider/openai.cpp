@@ -4,6 +4,53 @@
 
 namespace agentforge {
 
+namespace {
+
+void serialize_tool_result_messages(nlohmann::json& messages, const Message& msg) {
+    for (const auto& block : msg.content) {
+        if (std::holds_alternative<ToolResultBlock>(block)) {
+            const auto& result = std::get<ToolResultBlock>(block);
+            nlohmann::json tool_msg;
+            tool_msg["role"] = "tool";
+            tool_msg["tool_call_id"] = result.tool_use_id;
+            tool_msg["content"] = result.content;
+            messages.push_back(std::move(tool_msg));
+        }
+    }
+}
+
+nlohmann::json serialize_message(const Message& msg) {
+    nlohmann::json msg_json;
+    msg_json["role"] = msg.role;
+
+    std::string text_content;
+    nlohmann::json tool_calls = nlohmann::json::array();
+
+    for (const auto& block : msg.content) {
+        if (std::holds_alternative<TextBlock>(block)) {
+            text_content = std::get<TextBlock>(block).text;
+        } else if (std::holds_alternative<ToolUseBlock>(block)) {
+            const auto& tool = std::get<ToolUseBlock>(block);
+            tool_calls.push_back(
+                {{"id", tool.id},
+                 {"type", "function"},
+                 {"function", {{"name", tool.name}, {"arguments", tool.input.dump()}}}});
+        }
+    }
+
+    if (!tool_calls.empty()) {
+        msg_json["tool_calls"] = std::move(tool_calls);
+        msg_json["content"] =
+            text_content.empty() ? nlohmann::json(nullptr) : nlohmann::json(text_content);
+    } else {
+        msg_json["content"] = text_content;
+    }
+
+    return msg_json;
+}
+
+} // namespace
+
 OpenAiProvider::OpenAiProvider(HttpClient& client, ProviderConfig config)
     : client_(client), config_(std::move(config)) {
     if (config_.base_url.empty()) {
@@ -32,27 +79,11 @@ nlohmann::json OpenAiProvider::serialize_request(const Conversation& conversatio
     }
 
     for (const auto& msg : conversation.messages()) {
-        nlohmann::json msg_json;
-        msg_json["role"] = msg.role;
-
-        if (msg.role == Role::tool && msg.content.size() == 1 &&
-            std::holds_alternative<ToolResultBlock>(msg.content[0])) {
-            const auto& result = std::get<ToolResultBlock>(msg.content[0]);
-            msg_json["role"] = "tool";
-            msg_json["tool_call_id"] = result.tool_use_id;
-            msg_json["content"] = result.content;
-        } else if (msg.content.size() == 1 && std::holds_alternative<TextBlock>(msg.content[0])) {
-            msg_json["content"] = std::get<TextBlock>(msg.content[0]).text;
-        } else {
-            auto& content = msg_json["content"] = nlohmann::json::array();
-            for (const auto& block : msg.content) {
-                nlohmann::json block_json;
-                to_json(block_json, block);
-                content.push_back(std::move(block_json));
-            }
+        if (msg.role == Role::tool) {
+            serialize_tool_result_messages(messages, msg);
+            continue;
         }
-
-        messages.push_back(std::move(msg_json));
+        messages.push_back(serialize_message(msg));
     }
 
     if (!tools.empty()) {
@@ -63,9 +94,14 @@ nlohmann::json OpenAiProvider::serialize_request(const Conversation& conversatio
     }
 
     if (output_schema != nullptr) {
+        auto schema_copy = *output_schema;
+        if (schema_copy.value("type", "") == "object") {
+            schema_copy["additionalProperties"] = false;
+        }
         request["response_format"] = {
             {"type", "json_schema"},
-            {"json_schema", {{"name", "response"}, {"strict", true}, {"schema", *output_schema}}}};
+            {"json_schema",
+             {{"name", "response"}, {"strict", true}, {"schema", std::move(schema_copy)}}}};
     }
 
     return request;

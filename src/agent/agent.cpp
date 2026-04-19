@@ -3,10 +3,54 @@
 #include <agentforge/provider/anthropic.hpp>
 #include <agentforge/provider/openai.hpp>
 
+#include <algorithm>
 #include <stdexcept>
 #include <variant>
 
 namespace agentforge {
+
+namespace {
+
+std::string extract_text(const std::vector<ContentBlock>& blocks) {
+    for (const auto& block : blocks) {
+        if (std::holds_alternative<TextBlock>(block)) {
+            return std::get<TextBlock>(block).text;
+        }
+    }
+    return {};
+}
+
+std::vector<ContentBlock> dispatch_tools(ToolRegistry& registry, const Message& message) {
+    std::vector<ContentBlock> results;
+    for (const auto& block : message.content) {
+        if (!std::holds_alternative<ToolUseBlock>(block)) {
+            continue;
+        }
+        const auto& tool_call = std::get<ToolUseBlock>(block);
+        try {
+            auto output = registry.execute(tool_call.name, tool_call.input);
+            results.emplace_back(ToolResultBlock{
+                .tool_use_id = tool_call.id,
+                .content = output.dump(),
+            });
+        } catch (const std::exception& e) {
+            results.emplace_back(ToolResultBlock{
+                .tool_use_id = tool_call.id,
+                .content = e.what(),
+                .is_error = true,
+            });
+        }
+    }
+    return results;
+}
+
+bool has_tool_use(const Message& message) {
+    return std::ranges::any_of(message.content, [](const ContentBlock& block) {
+        return std::holds_alternative<ToolUseBlock>(block);
+    });
+}
+
+} // namespace
 
 Agent::Agent(LlmProvider& provider, AgentConfig config)
     : provider_(&provider), config_(std::move(config)) {}
@@ -82,10 +126,18 @@ AgentResult Agent::execute_loop(Conversation& conversation) {
 
     for (int iteration = 0; iteration < config_.max_iterations; ++iteration) {
         LlmResponse response;
-        if (tool_defs.empty()) {
-            response = provider_->chat(conversation);
-        } else {
-            response = provider_->chat(conversation, std::span<const nlohmann::json>(tool_defs));
+        try {
+            if (tool_defs.empty()) {
+                response = provider_->chat(conversation);
+            } else {
+                response =
+                    provider_->chat(conversation, std::span<const nlohmann::json>(tool_defs));
+            }
+        } catch (const std::exception& e) {
+            result.iterations = iteration + 1;
+            result.finish_reason = "error";
+            result.error = e.what();
+            return result;
         }
 
         result.total_usage.input_tokens += response.usage.input_tokens;
@@ -96,51 +148,17 @@ AgentResult Agent::execute_loop(Conversation& conversation) {
 
         conversation.add(response.message);
 
-        bool has_tool_calls = false;
-        std::vector<ContentBlock> tool_results;
-
-        for (const auto& block : response.message.content) {
-            if (!std::holds_alternative<ToolUseBlock>(block)) {
-                continue;
-            }
-            has_tool_calls = true;
-            const auto& tool_call = std::get<ToolUseBlock>(block);
-
-            try {
-                auto tool_output = registry_.execute(tool_call.name, tool_call.input);
-                tool_results.emplace_back(ToolResultBlock{
-                    .tool_use_id = tool_call.id,
-                    .content = tool_output.dump(),
-                });
-            } catch (const std::exception& e) {
-                tool_results.emplace_back(ToolResultBlock{
-                    .tool_use_id = tool_call.id,
-                    .content = e.what(),
-                    .is_error = true,
-                });
-            }
-        }
-
-        if (!has_tool_calls) {
-            for (const auto& block : response.message.content) {
-                if (std::holds_alternative<TextBlock>(block)) {
-                    result.text = std::get<TextBlock>(block).text;
-                    break;
-                }
-            }
+        if (!has_tool_use(response.message)) {
+            result.text = extract_text(response.message.content);
             return result;
         }
 
+        auto tool_results = dispatch_tools(registry_, response.message);
         conversation.add(Message(Role::tool, std::move(tool_results)));
     }
 
     result.finish_reason = "max_iterations";
-    for (const auto& block : result.message.content) {
-        if (std::holds_alternative<TextBlock>(block)) {
-            result.text = std::get<TextBlock>(block).text;
-            break;
-        }
-    }
+    result.text = extract_text(result.message.content);
     return result;
 }
 
