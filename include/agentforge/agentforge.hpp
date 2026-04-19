@@ -3,6 +3,7 @@
 
 #include <agentforge/agent/agent.hpp>
 #include <agentforge/agent/config.hpp>
+#include <agentforge/agent/options.hpp>
 #include <agentforge/agent/result.hpp>
 #include <agentforge/http/client.hpp>
 #include <agentforge/http/curl_client.hpp>
