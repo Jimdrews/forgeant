@@ -8,6 +8,7 @@ add_executable(agentforge_benchmarks
     bench_provider.cpp
     bench_tool.cpp
     bench_structured.cpp
+    bench_agent.cpp
 )
 
 target_link_libraries(agentforge_benchmarks

@@ -21,6 +21,7 @@ add_library(agentforge
     src/schema/schema.cpp
     src/tool/registry.cpp
     src/structured/structured.cpp
+    src/agent/agent.cpp
 )
 add_library(agentforge::agentforge ALIAS agentforge)
 

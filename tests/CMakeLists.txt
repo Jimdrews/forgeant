@@ -15,6 +15,7 @@ add_executable(agentforge_tests
     test_registry.cpp
     test_params_macro.cpp
     test_structured.cpp
+    test_agent.cpp
 )
 
 target_link_libraries(agentforge_tests
