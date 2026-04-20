@@ -1,4 +1,5 @@
 #include <agentforge/agent/agent.hpp>
+#include <agentforge/agent/error.hpp>
 #include <agentforge/schema/schema.hpp>
 #include <agentforge/tool/tool.hpp>
 
@@ -33,22 +34,10 @@ namespace {
 class MockProvider : public LlmProvider {
   public:
     std::queue<LlmResponse> responses;
-    std::vector<nlohmann::json> captured_requests;
+    std::vector<ChatRequest> captured_requests;
 
-    LlmResponse chat(const Conversation& conversation) override { return next_response(); }
-
-    LlmResponse chat(const Conversation& conversation,
-                     std::span<const nlohmann::json> tools) override {
-        return next_response();
-    }
-
-    LlmResponse chat(const Conversation& conversation,
-                     const nlohmann::json& output_schema) override {
-        return next_response();
-    }
-
-  private:
-    LlmResponse next_response() {
+    LlmResponse chat(const Conversation&, const ChatRequest& request) override {
+        captured_requests.push_back(request);
         auto r = responses.front();
         responses.pop();
         return r;
@@ -96,7 +85,7 @@ TEST_CASE("Agent simple text response", "[agent]") {
     Agent agent(provider);
     auto result = agent.run("Hi");
 
-    REQUIRE(result.text == "Hello!");
+    REQUIRE(result.output == "Hello!");
     REQUIRE(result.iterations == 1);
     REQUIRE(result.finish_reason == "end_turn");
 }
@@ -111,7 +100,7 @@ TEST_CASE("Agent tool call cycle", "[agent]") {
         make_tool<AddParams>("add", "Add numbers", [](AddParams p) { return p.a + p.b; }));
     auto result = agent.run("What is 2+3?");
 
-    REQUIRE(result.text == "The answer is 5.");
+    REQUIRE(result.output == "The answer is 5.");
     REQUIRE(result.iterations == 2);
 }
 
@@ -125,7 +114,7 @@ TEST_CASE("Agent multiple tool calls in one response", "[agent]") {
         make_tool<AddParams>("add", "Add numbers", [](AddParams p) { return p.a + p.b; }));
     auto result = agent.run("Add 1+2 and 3+4");
 
-    REQUIRE(result.text == "Results: 3 and 7.");
+    REQUIRE(result.output == "Results: 3 and 7.");
     REQUIRE(result.iterations == 2);
 }
 
@@ -140,49 +129,68 @@ TEST_CASE("Agent tool error wrapping", "[agent]") {
         [](const nlohmann::json&) -> nlohmann::json { throw std::runtime_error("tool broke"); }));
     auto result = agent.run("Try the tool");
 
-    REQUIRE(result.text == "Sorry, that failed.");
+    REQUIRE(result.output == "Sorry, that failed.");
     REQUIRE(result.iterations == 2);
 }
 
-TEST_CASE("Agent max iterations termination", "[agent]") {
+TEST_CASE("Agent max iterations throws", "[agent]") {
     MockProvider provider;
     for (int i = 0; i < 3; ++i) {
         provider.responses.push(
             tool_call_response("call_" + std::to_string(i), "add", {{"a", 1}, {"b", 1}}));
     }
 
-    Agent agent(provider, {.max_iterations = 3});
+    Agent agent(provider, AgentOptions{.max_iterations = 3});
     agent.add_tool(make_tool<AddParams>("add", "Add", [](AddParams p) { return p.a + p.b; }));
-    auto result = agent.run("Keep adding");
 
-    REQUIRE(result.iterations == 3);
-    REQUIRE(result.finish_reason == "max_iterations");
+    try {
+        agent.run("Keep adding");
+        FAIL("expected AgentRunError");
+    } catch (const AgentRunError& e) {
+        REQUIRE(e.kind() == AgentRunError::Kind::max_iterations);
+        REQUIRE(e.iterations() == 3);
+        REQUIRE(e.finish_reason() == "max_iterations");
+    }
 }
 
 TEST_CASE("Agent system prompt applied in run()", "[agent]") {
     MockProvider provider;
     provider.responses.push(text_response("I am helpful."));
 
-    Agent agent(provider, {.system_prompt = "You are helpful."});
+    Agent agent(provider, AgentOptions{.system_prompt = "You are helpful."});
     auto result = agent.run("Hi");
 
-    REQUIRE(result.text == "I am helpful.");
+    REQUIRE(result.output == "I am helpful.");
+    REQUIRE(result.conversation.system_prompt().has_value());
+    REQUIRE(*result.conversation.system_prompt() == "You are helpful.");
 }
 
-TEST_CASE("Agent multi-turn chat preserves history", "[agent]") {
+TEST_CASE("Agent multi-turn via result.conversation preserves history", "[agent]") {
     MockProvider provider;
     provider.responses.push(text_response("Hello!"));
     provider.responses.push(text_response("I'm fine."));
 
     Agent agent(provider);
+    auto r1 = agent.run("Hi");
+    REQUIRE(r1.conversation.messages().size() == 2);
+
+    auto r2 = agent.run(r1.conversation);
+    REQUIRE(r2.conversation.messages().size() == 3);
+}
+
+TEST_CASE("Agent does not mutate caller Conversation", "[agent]") {
+    MockProvider provider;
+    provider.responses.push(text_response("ok"));
+
+    Agent agent(provider);
+
     Conversation conv;
-    agent.chat(conv, "Hi");
+    conv.add(Message(Role::user, "hi"));
+    const Conversation snapshot = conv;
 
-    REQUIRE(conv.messages().size() == 2);
+    agent.run(conv);
 
-    agent.chat(conv, "How are you?");
-
-    REQUIRE(conv.messages().size() == 4);
+    REQUIRE(conv == snapshot);
 }
 
 TEST_CASE("Agent cumulative usage tracking", "[agent]") {
@@ -199,75 +207,120 @@ TEST_CASE("Agent cumulative usage tracking", "[agent]") {
     REQUIRE(result.iterations == 2);
 }
 
-TEST_CASE("Agent provider error returns error result", "[agent]") {
+TEST_CASE("Agent provider error throws AgentRunError with partial state", "[agent]") {
     struct ErrorProvider : LlmProvider {
-        LlmResponse chat(const Conversation&) override {
-            throw std::runtime_error("connection timeout");
-        }
-        LlmResponse chat(const Conversation&, std::span<const nlohmann::json>) override {
-            throw std::runtime_error("connection timeout");
-        }
-        LlmResponse chat(const Conversation&, const nlohmann::json&) override {
+        LlmResponse chat(const Conversation&, const ChatRequest&) override {
             throw std::runtime_error("connection timeout");
         }
     };
 
     ErrorProvider provider;
     Agent agent(provider);
-    auto result = agent.run("Hello");
 
-    REQUIRE(result.has_error());
-    REQUIRE(result.finish_reason == "error");
-    REQUIRE(result.error.find("connection timeout") != std::string::npos);
+    try {
+        agent.run("Hello");
+        FAIL("expected AgentRunError");
+    } catch (const AgentRunError& e) {
+        REQUIRE(e.kind() == AgentRunError::Kind::provider_error);
+        REQUIRE(e.finish_reason() == "error");
+        REQUIRE(std::string(e.what()).find("connection timeout") != std::string::npos);
+    }
 }
 
 TEST_CASE("Agent error preserves iteration count and usage", "[agent]") {
-    MockProvider provider;
-    provider.responses.push(tool_call_response("1", "add", {{"a", 1}, {"b", 2}}, 100, 50));
-
     struct ErrorAfterOneProvider : LlmProvider {
-        MockProvider& inner;
         int call_count = 0;
-        explicit ErrorAfterOneProvider(MockProvider& m) : inner(m) {}
-        LlmResponse chat(const Conversation& c) override {
-            if (call_count++ > 0) {
-                throw std::runtime_error("timeout on second call");
+        LlmResponse chat(const Conversation&, const ChatRequest&) override {
+            if (call_count++ == 0) {
+                return tool_call_response("1", "add", {{"a", 1}, {"b", 2}}, 100, 50);
             }
-            return inner.chat(c);
-        }
-        LlmResponse chat(const Conversation& c, std::span<const nlohmann::json> t) override {
-            if (call_count++ > 0) {
-                throw std::runtime_error("timeout on second call");
-            }
-            return inner.chat(c, t);
-        }
-        LlmResponse chat(const Conversation&, const nlohmann::json&) override {
-            throw std::runtime_error("not used");
+            throw std::runtime_error("timeout on second call");
         }
     };
 
-    ErrorAfterOneProvider error_provider(provider);
-    Agent agent(error_provider);
+    ErrorAfterOneProvider provider;
+    Agent agent(provider);
     agent.add_tool(make_tool<AddParams>("add", "Add", [](AddParams p) { return p.a + p.b; }));
-    auto result = agent.run("Add");
 
-    REQUIRE(result.has_error());
-    REQUIRE(result.iterations == 2);
-    REQUIRE(result.total_usage.input_tokens == 100);
-    REQUIRE(result.total_usage.output_tokens == 50);
+    try {
+        agent.run("Add");
+        FAIL("expected AgentRunError");
+    } catch (const AgentRunError& e) {
+        REQUIRE(e.iterations() == 2);
+        REQUIRE(e.usage().input_tokens == 100);
+        REQUIRE(e.usage().output_tokens == 50);
+    }
 }
 
-TEST_CASE("Agent successful run has no error", "[agent]") {
+TEST_CASE("Agent RunOverrides::system_prompt applies for current call only", "[agent]") {
     MockProvider provider;
-    provider.responses.push(text_response("Hello!"));
+    provider.responses.push(text_response("first"));
+    provider.responses.push(text_response("second"));
 
-    Agent agent(provider);
-    auto result = agent.run("Hi");
+    Agent agent(provider, AgentOptions{.system_prompt = "stored"});
+    auto r1 = agent.run("hi", RunOverrides{.system_prompt = std::string("overridden")});
+    REQUIRE(*r1.conversation.system_prompt() == "overridden");
 
-    REQUIRE(!result.has_error());
-    REQUIRE(result.error.empty());
+    auto r2 = agent.run("hi");
+    REQUIRE(*r2.conversation.system_prompt() == "stored");
+}
+
+TEST_CASE("Agent RunOverrides::max_iterations applies for current call only", "[agent]") {
+    MockProvider provider;
+    for (int i = 0; i < 5; ++i) {
+        provider.responses.push(
+            tool_call_response("c" + std::to_string(i), "add", {{"a", 1}, {"b", 1}}));
+    }
+
+    Agent agent(provider, AgentOptions{.max_iterations = 10});
+    agent.add_tool(make_tool<AddParams>("add", "Add", [](AddParams p) { return p.a + p.b; }));
+
+    try {
+        agent.run("go", RunOverrides{.max_iterations = 2});
+        FAIL("expected AgentRunError");
+    } catch (const AgentRunError& e) {
+        REQUIRE(e.kind() == AgentRunError::Kind::max_iterations);
+        REQUIRE(e.iterations() == 2);
+    }
+}
+
+TEST_CASE("Conversation system_prompt wins over override", "[agent]") {
+    MockProvider provider;
+    provider.responses.push(text_response("ok"));
+
+    Agent agent(provider, AgentOptions{.system_prompt = "stored"});
+
+    Conversation conv("from conversation");
+    conv.add(Message(Role::user, "hi"));
+
+    auto r = agent.run(conv, RunOverrides{.system_prompt = std::string("override")});
+    REQUIRE(*r.conversation.system_prompt() == "from conversation");
 }
 
 TEST_CASE("Agent factory invalid provider still throws", "[agent]") {
     REQUIRE_THROWS_AS(Agent::create("invalid", {.model = "x"}), std::invalid_argument);
+}
+
+TEST_CASE("Agent::run<T> composes tool loop with structured output", "[agent]") {
+    MockProvider provider;
+    provider.responses.push(tool_call_response("c1", "add", {{"a", 2}, {"b", 3}}));
+
+    LlmResponse final;
+    final.message = Message(Role::assistant, R"({"a": 2, "b": 3})");
+    final.finish_reason = "end_turn";
+    final.usage = {.input_tokens = 10, .output_tokens = 5};
+    final.model = "mock";
+    provider.responses.push(final);
+
+    Agent agent(provider);
+    agent.add_tool(make_tool<AddParams>("add", "Add", [](AddParams p) { return p.a + p.b; }));
+
+    auto result = agent.run<AddParams>("Please structure as AddParams");
+
+    REQUIRE(result.output.a == 2);
+    REQUIRE(result.output.b == 3);
+    REQUIRE(result.iterations == 2);
+
+    REQUIRE(provider.captured_requests.size() >= 1);
+    REQUIRE(provider.captured_requests.back().output_schema.has_value());
 }

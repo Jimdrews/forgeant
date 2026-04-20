@@ -41,15 +41,11 @@ int main() {
                                                    .model = model != nullptr ? model : "llama3",
                                                });
 
-        agentforge::Conversation conv;
-        conv.add(
-            agentforge::Message(agentforge::Role::user, "Review the movie 'The Matrix' (1999)."));
+        auto result = agent->run<MovieReview>("Review the movie 'The Matrix' (1999).");
 
-        auto review = agent->structured<MovieReview>(conv);
-
-        std::cout << "Title: " << review.title << std::endl;
-        std::cout << "Rating: " << review.rating << "/10" << std::endl;
-        std::cout << "Summary: " << review.summary << std::endl;
+        std::cout << "Title: " << result.output.title << std::endl;
+        std::cout << "Rating: " << result.output.rating << "/10" << std::endl;
+        std::cout << "Summary: " << result.output.summary << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;

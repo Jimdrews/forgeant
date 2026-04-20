@@ -12,21 +12,20 @@ AnthropicProvider::AnthropicProvider(HttpClient& client, ProviderConfig config)
 }
 
 nlohmann::json AnthropicProvider::serialize_request(const Conversation& conversation,
-                                                    std::span<const nlohmann::json> tools,
-                                                    const nlohmann::json* output_schema) const {
-    nlohmann::json request;
-    request["model"] = config_.model;
-    request["max_tokens"] = config_.max_tokens.value_or(1024);
+                                                    const ChatRequest& request) const {
+    nlohmann::json body;
+    body["model"] = config_.model;
+    body["max_tokens"] = config_.max_tokens.value_or(1024);
 
     if (const auto& sp = conversation.system_prompt()) {
-        request["system"] = *sp;
+        body["system"] = *sp;
     }
 
     if (config_.temperature.has_value()) {
-        request["temperature"] = config_.temperature.value();
+        body["temperature"] = config_.temperature.value();
     }
 
-    auto& messages = request["messages"] = nlohmann::json::array();
+    auto& messages = body["messages"] = nlohmann::json::array();
     for (const auto& msg : conversation.messages()) {
         nlohmann::json msg_json;
 
@@ -46,21 +45,21 @@ nlohmann::json AnthropicProvider::serialize_request(const Conversation& conversa
         messages.push_back(std::move(msg_json));
     }
 
-    if (!tools.empty()) {
-        request["tools"] = nlohmann::json::array();
-        for (const auto& tool : tools) {
-            request["tools"].push_back(tool);
+    if (!request.tools.empty()) {
+        body["tools"] = nlohmann::json::array();
+        for (const auto& tool : request.tools) {
+            body["tools"].push_back(tool);
         }
     }
 
-    if (output_schema != nullptr) {
-        request["output_config"] = {
+    if (request.output_schema.has_value()) {
+        body["output_config"] = {
             {"format",
              {{"type", "json_schema"},
-              {"json_schema", {{"name", "response"}, {"schema", *output_schema}}}}}};
+              {"json_schema", {{"name", "response"}, {"schema", *request.output_schema}}}}}};
     }
 
-    return request;
+    return body;
 }
 
 LlmResponse AnthropicProvider::deserialize_response(const nlohmann::json& json) {
@@ -102,38 +101,8 @@ HttpHeaders AnthropicProvider::auth_headers() const {
             {"content-type", "application/json"}};
 }
 
-LlmResponse AnthropicProvider::chat(const Conversation& conversation) {
-    return chat(conversation, std::span<const nlohmann::json>{});
-}
-
-LlmResponse AnthropicProvider::chat(const Conversation& conversation,
-                                    std::span<const nlohmann::json> tools) {
-    auto request_body = serialize_request(conversation, tools);
-    auto http_response = client_.post(endpoint_url(), auth_headers(), request_body.dump());
-
-    if (http_response.status_code < 200 || http_response.status_code >= 300) {
-        std::string error_msg =
-            "Anthropic API error (HTTP " + std::to_string(http_response.status_code) + ")";
-        if (!http_response.body.empty()) {
-            try {
-                auto err_json = nlohmann::json::parse(http_response.body);
-                if (err_json.contains("error") && err_json["error"].contains("message")) {
-                    error_msg += ": " + err_json["error"]["message"].get<std::string>();
-                }
-            } catch (...) {
-                error_msg += ": " + http_response.body;
-            }
-        }
-        throw std::runtime_error(error_msg);
-    }
-
-    auto response_json = nlohmann::json::parse(http_response.body);
-    return deserialize_response(response_json);
-}
-
-LlmResponse AnthropicProvider::chat(const Conversation& conversation,
-                                    const nlohmann::json& output_schema) {
-    auto request_body = serialize_request(conversation, {}, &output_schema);
+LlmResponse AnthropicProvider::chat(const Conversation& conversation, const ChatRequest& request) {
+    auto request_body = serialize_request(conversation, request);
     auto http_response = client_.post(endpoint_url(), auth_headers(), request_body.dump());
 
     if (http_response.status_code < 200 || http_response.status_code >= 300) {

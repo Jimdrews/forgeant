@@ -17,24 +17,28 @@ int main() {
                 .system_prompt = "You are a helpful assistant. Be concise.",
             });
 
-        agentforge::Conversation conv;
-
         std::cout << "=== Turn 1 ===" << std::endl;
         std::cout << "User: My name is Alice. Remember that." << std::endl;
-        auto r1 = agent->chat(conv, "My name is Alice. Remember that.");
-        std::cout << "Assistant: " << r1.text << std::endl;
+        auto r1 = agent->run("My name is Alice. Remember that.");
+        std::cout << "Assistant: " << r1.output << std::endl;
 
         std::cout << "\n=== Turn 2 ===" << std::endl;
         std::cout << "User: What is my name?" << std::endl;
-        auto r2 = agent->chat(conv, "What is my name?");
-        std::cout << "Assistant: " << r2.text << std::endl;
+        agentforge::Conversation conv = r1.conversation;
+        conv.add(agentforge::Message(agentforge::Role::user, "What is my name?"));
+        auto r2 = agent->run(conv);
+        std::cout << "Assistant: " << r2.output << std::endl;
 
         std::cout << "\n=== Turn 3 ===" << std::endl;
         std::cout << "User: How many messages have we exchanged so far?" << std::endl;
-        auto r3 = agent->chat(conv, "How many messages have we exchanged so far?");
-        std::cout << "Assistant: " << r3.text << std::endl;
+        conv = r2.conversation;
+        conv.add(agentforge::Message(agentforge::Role::user,
+                                     "How many messages have we exchanged so far?"));
+        auto r3 = agent->run(conv);
+        std::cout << "Assistant: " << r3.output << std::endl;
 
-        std::cout << "\nConversation has " << conv.messages().size() << " messages" << std::endl;
+        std::cout << "\nConversation has " << r3.conversation.messages().size() << " messages"
+                  << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;

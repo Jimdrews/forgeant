@@ -4,21 +4,13 @@
 #include <agentforge/provider/openai.hpp>
 
 #include <algorithm>
+#include <ranges>
 #include <stdexcept>
 #include <variant>
 
 namespace agentforge {
 
 namespace {
-
-std::string extract_text(const std::vector<ContentBlock>& blocks) {
-    for (const auto& block : blocks) {
-        if (std::holds_alternative<TextBlock>(block)) {
-            return std::get<TextBlock>(block).text;
-        }
-    }
-    return {};
-}
 
 std::vector<ContentBlock> dispatch_tools(ToolRegistry& registry, const Message& message) {
     std::vector<ContentBlock> results;
@@ -52,13 +44,13 @@ bool has_tool_use(const Message& message) {
 
 } // namespace
 
-Agent::Agent(LlmProvider& provider, AgentConfig config)
-    : provider_(&provider), config_(std::move(config)) {}
+Agent::Agent(LlmProvider& provider, AgentOptions options)
+    : provider_(&provider), options_(std::move(options)) {}
 
 Agent::Agent(std::unique_ptr<HttpClient> http, std::unique_ptr<LlmProvider> provider,
-             AgentConfig config)
+             AgentOptions options)
     : owned_http_(std::move(http)), owned_provider_(std::move(provider)),
-      provider_(owned_provider_.get()), config_(std::move(config)) {}
+      provider_(owned_provider_.get()), options_(std::move(options)) {}
 
 std::unique_ptr<Agent> Agent::create(const std::string& provider_name,
                                      const AgentOptions& options) {
@@ -75,14 +67,8 @@ std::unique_ptr<Agent> Agent::create(const std::string& provider_name,
     std::unique_ptr<LlmProvider> provider;
 
     if (provider_name == "anthropic") {
-        if (provider_config.base_url.empty()) {
-            provider_config.base_url = "https://api.anthropic.com";
-        }
         provider = std::make_unique<AnthropicProvider>(*http, std::move(provider_config));
     } else if (provider_name == "openai") {
-        if (provider_config.base_url.empty()) {
-            provider_config.base_url = "https://api.openai.com";
-        }
         provider = std::make_unique<OpenAiProvider>(*http, std::move(provider_config));
     } else if (provider_name == "ollama") {
         if (provider_config.base_url.empty()) {
@@ -93,73 +79,82 @@ std::unique_ptr<Agent> Agent::create(const std::string& provider_name,
         throw std::invalid_argument("unknown provider: " + provider_name);
     }
 
-    AgentConfig agent_config{
-        .max_iterations = options.max_iterations,
-        .system_prompt = options.system_prompt,
-    };
-
-    return std::unique_ptr<Agent>(
-        new Agent(std::move(http), std::move(provider), std::move(agent_config)));
+    return std::unique_ptr<Agent>(new Agent(std::move(http), std::move(provider), options));
 }
 
 void Agent::add_tool(Tool tool) {
     registry_.add(std::move(tool));
 }
 
-AgentResult Agent::run(const std::string& prompt) {
-    Conversation conversation;
-    if (!config_.system_prompt.empty()) {
-        conversation.set_system_prompt(config_.system_prompt);
+void Agent::apply_system_prompt(Conversation& working, const RunOverrides& overrides) const {
+    if (working.system_prompt().has_value()) {
+        return;
     }
-    conversation.add(Message(Role::user, prompt));
-    return execute_loop(conversation);
+    if (overrides.system_prompt.has_value()) {
+        working.set_system_prompt(*overrides.system_prompt);
+        return;
+    }
+    if (!options_.system_prompt.empty()) {
+        working.set_system_prompt(options_.system_prompt);
+    }
 }
 
-AgentResult Agent::chat(Conversation& conversation, const std::string& prompt) {
-    conversation.add(Message(Role::user, prompt));
-    return execute_loop(conversation);
+std::string Agent::extract_last_text(const Conversation& conv) {
+    const auto messages = conv.messages();
+    for (auto it = messages.rbegin(); it != messages.rend(); ++it) {
+        if (it->role != Role::assistant) {
+            continue;
+        }
+        for (const auto& block : it->content) {
+            if (std::holds_alternative<TextBlock>(block)) {
+                return std::get<TextBlock>(block).text;
+            }
+        }
+    }
+    return {};
 }
 
-AgentResult Agent::execute_loop(Conversation& conversation) {
-    AgentResult result;
+Agent::LoopResult Agent::execute_loop(Conversation working, const RunOverrides& overrides,
+                                      const std::optional<nlohmann::json>& output_schema) {
     auto tool_defs = registry_.definitions();
+    const int max_iterations = overrides.max_iterations.value_or(options_.max_iterations);
 
-    for (int iteration = 0; iteration < config_.max_iterations; ++iteration) {
+    LoopResult result;
+    Usage accumulated;
+
+    for (int iteration = 0; iteration < max_iterations; ++iteration) {
+        ChatRequest request;
+        request.tools = std::span<const nlohmann::json>(tool_defs);
+        request.output_schema = output_schema;
+
         LlmResponse response;
         try {
-            if (tool_defs.empty()) {
-                response = provider_->chat(conversation);
-            } else {
-                response =
-                    provider_->chat(conversation, std::span<const nlohmann::json>(tool_defs));
-            }
+            response = provider_->chat(working, request);
         } catch (const std::exception& e) {
-            result.iterations = iteration + 1;
-            result.finish_reason = "error";
-            result.error = e.what();
-            return result;
+            throw AgentRunError(AgentRunError::Kind::provider_error, e.what(), std::move(working),
+                                accumulated, iteration + 1, "error");
         }
 
-        result.total_usage.input_tokens += response.usage.input_tokens;
-        result.total_usage.output_tokens += response.usage.output_tokens;
-        result.iterations = iteration + 1;
-        result.finish_reason = response.finish_reason;
-        result.message = response.message;
+        accumulated.input_tokens += response.usage.input_tokens;
+        accumulated.output_tokens += response.usage.output_tokens;
 
-        conversation.add(response.message);
+        working.add(response.message);
 
         if (!has_tool_use(response.message)) {
-            result.text = extract_text(response.message.content);
+            result.conversation = std::move(working);
+            result.total_usage = accumulated;
+            result.iterations = iteration + 1;
+            result.finish_reason = response.finish_reason;
             return result;
         }
 
         auto tool_results = dispatch_tools(registry_, response.message);
-        conversation.add(Message(Role::tool, std::move(tool_results)));
+        working.add(Message(Role::tool, std::move(tool_results)));
     }
 
-    result.finish_reason = "max_iterations";
-    result.text = extract_text(result.message.content);
-    return result;
+    throw AgentRunError(AgentRunError::Kind::max_iterations,
+                        "max_iterations reached without a terminal response", std::move(working),
+                        accumulated, max_iterations, "max_iterations");
 }
 
 } // namespace agentforge

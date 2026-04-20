@@ -51,12 +51,7 @@ int main() {
 
         auto result = agent->run("What's the weather like in Denver?");
 
-        if (result.has_error()) {
-            std::cerr << "Error: " << result.error << std::endl;
-            return 1;
-        }
-
-        std::cout << "Response: " << result.text << std::endl;
+        std::cout << "Response: " << result.output << std::endl;
         std::cout << "Iterations: " << result.iterations << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

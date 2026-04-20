@@ -19,12 +19,7 @@ int main() {
 
         auto result = agent->run("What is the capital of France? Answer in one sentence.");
 
-        if (result.has_error()) {
-            std::cerr << "Error: " << result.error << std::endl;
-            return 1;
-        }
-
-        std::cout << "Response: " << result.text << std::endl;
+        std::cout << "Response: " << result.output << std::endl;
         std::cout << "Tokens: " << result.total_usage.input_tokens << " in, "
                   << result.total_usage.output_tokens << " out" << std::endl;
         std::cout << "Iterations: " << result.iterations << std::endl;

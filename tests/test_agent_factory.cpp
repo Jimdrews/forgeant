@@ -90,44 +90,32 @@ TEST_CASE("AgentOptions with all fields set", "[factory]") {
 
 TEST_CASE("Factory agent run() works with explicit provider mock", "[factory]") {
     struct MockProvider : LlmProvider {
-        LlmResponse chat(const Conversation&) override {
+        LlmResponse chat(const Conversation&, const ChatRequest&) override {
             LlmResponse r;
             r.message = Message(Role::assistant, "factory response");
             r.finish_reason = "end_turn";
             return r;
-        }
-        LlmResponse chat(const Conversation&, std::span<const nlohmann::json>) override {
-            return chat(Conversation{});
-        }
-        LlmResponse chat(const Conversation&, const nlohmann::json&) override {
-            return chat(Conversation{});
         }
     };
 
     MockProvider provider;
     Agent agent(provider);
     auto result = agent.run("test");
-    REQUIRE(result.text == "factory response");
+    REQUIRE(result.output == "factory response");
 }
 
 TEST_CASE("Explicit Agent constructor still works", "[factory]") {
     struct MinimalProvider : LlmProvider {
-        LlmResponse chat(const Conversation&) override {
+        LlmResponse chat(const Conversation&, const ChatRequest&) override {
             LlmResponse r;
             r.message = Message(Role::assistant, "hi");
             r.finish_reason = "end_turn";
             return r;
         }
-        LlmResponse chat(const Conversation&, std::span<const nlohmann::json>) override {
-            return chat(Conversation{});
-        }
-        LlmResponse chat(const Conversation&, const nlohmann::json&) override {
-            return chat(Conversation{});
-        }
     };
 
     MinimalProvider provider;
-    Agent agent(provider, {.system_prompt = "test"});
+    Agent agent(provider, AgentOptions{.system_prompt = "test"});
     auto result = agent.run("hello");
-    REQUIRE(result.text == "hi");
+    REQUIRE(result.output == "hi");
 }

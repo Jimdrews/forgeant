@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(agentforge
-    VERSION 0.1.0
+    VERSION 0.2.0
     LANGUAGES CXX
     DESCRIPTION "C++ Agentic AI Framework"
 )
@@ -22,6 +22,7 @@ add_library(agentforge
     src/tool/registry.cpp
     src/structured/structured.cpp
     src/agent/agent.cpp
+    src/agent/error.cpp
 )
 add_library(agentforge::agentforge ALIAS agentforge)
 

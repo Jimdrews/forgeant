@@ -10,14 +10,8 @@ class BenchProvider : public agentforge::LlmProvider {
   public:
     agentforge::LlmResponse canned;
 
-    agentforge::LlmResponse chat(const agentforge::Conversation&) override { return canned; }
-
     agentforge::LlmResponse chat(const agentforge::Conversation&,
-                                 std::span<const nlohmann::json>) override {
-        return canned;
-    }
-
-    agentforge::LlmResponse chat(const agentforge::Conversation&, const nlohmann::json&) override {
+                                 const agentforge::ChatRequest&) override {
         return canned;
     }
 };

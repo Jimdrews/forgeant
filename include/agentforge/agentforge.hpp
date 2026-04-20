@@ -2,13 +2,15 @@
 #define AGENTFORGE_AGENTFORGE_HPP
 
 #include <agentforge/agent/agent.hpp>
-#include <agentforge/agent/config.hpp>
+#include <agentforge/agent/error.hpp>
 #include <agentforge/agent/options.hpp>
 #include <agentforge/agent/result.hpp>
+#include <agentforge/agent/run_overrides.hpp>
 #include <agentforge/http/client.hpp>
 #include <agentforge/http/curl_client.hpp>
 #include <agentforge/http/response.hpp>
 #include <agentforge/provider/anthropic.hpp>
+#include <agentforge/provider/chat_request.hpp>
 #include <agentforge/provider/config.hpp>
 #include <agentforge/provider/openai.hpp>
 #include <agentforge/provider/provider.hpp>

@@ -1,12 +1,9 @@
 #ifndef AGENTFORGE_PROVIDER_PROVIDER_HPP
 #define AGENTFORGE_PROVIDER_PROVIDER_HPP
 
+#include <agentforge/provider/chat_request.hpp>
 #include <agentforge/provider/response.hpp>
 #include <agentforge/types/conversation.hpp>
-
-#include <nlohmann/json.hpp>
-#include <span>
-#include <vector>
 
 namespace agentforge {
 
@@ -14,11 +11,7 @@ class LlmProvider {
   public:
     virtual ~LlmProvider() = default;
 
-    virtual LlmResponse chat(const Conversation& conversation) = 0;
-    virtual LlmResponse chat(const Conversation& conversation,
-                             std::span<const nlohmann::json> tools) = 0;
-    virtual LlmResponse chat(const Conversation& conversation,
-                             const nlohmann::json& output_schema) = 0;
+    virtual LlmResponse chat(const Conversation& conversation, const ChatRequest& request = {}) = 0;
 
     LlmProvider() = default;
     LlmProvider(const LlmProvider&) = delete;

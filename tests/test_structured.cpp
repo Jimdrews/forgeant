@@ -1,3 +1,4 @@
+#include <agentforge/agent/error.hpp>
 #include <agentforge/provider/anthropic.hpp>
 #include <agentforge/provider/openai.hpp>
 #include <agentforge/structured/structured.hpp>
@@ -66,8 +67,8 @@ TEST_CASE("structured<T> with Anthropic returns typed result", "[structured]") {
     conv.add(Message(Role::user, "Tell me about Alice"));
 
     auto result = structured<TestOutput>(provider, conv);
-    REQUIRE(result.name == "Alice");
-    REQUIRE(result.age == 30);
+    REQUIRE(result.output.name == "Alice");
+    REQUIRE(result.output.age == 30);
 }
 
 TEST_CASE("structured<T> with OpenAI returns typed result", "[structured]") {
@@ -79,8 +80,8 @@ TEST_CASE("structured<T> with OpenAI returns typed result", "[structured]") {
     conv.add(Message(Role::user, "Tell me about Bob"));
 
     auto result = structured<TestOutput>(provider, conv);
-    REQUIRE(result.name == "Bob");
-    REQUIRE(result.age == 25);
+    REQUIRE(result.output.name == "Bob");
+    REQUIRE(result.output.age == 25);
 }
 
 TEST_CASE("structured<T> extracts JSON from TextBlock", "[structured]") {
@@ -92,15 +93,12 @@ TEST_CASE("structured<T> extracts JSON from TextBlock", "[structured]") {
     conv.add(Message(Role::user, "Who?"));
 
     auto result = structured<TestOutput>(provider, conv);
-    REQUIRE(result.name == "Charlie");
+    REQUIRE(result.output.name == "Charlie");
 }
 
 TEST_CASE("structured<T> retries on parse failure", "[structured]") {
     testing::MockHttpClient mock;
     int call_count = 0;
-    mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string&) {
-        call_count++;
-    };
 
     nlohmann::json bad_response = {{"content", {{{"type", "text"}, {"text", "not json"}}}},
                                    {"model", "claude-sonnet-4-20250514"},
@@ -129,11 +127,11 @@ TEST_CASE("structured<T> retries on parse failure", "[structured]") {
     conv.add(Message(Role::user, "Test"));
 
     auto result = structured<TestOutput>(provider, conv);
-    REQUIRE(result.name == "Fixed");
+    REQUIRE(result.output.name == "Fixed");
     REQUIRE(call_count >= 2);
 }
 
-TEST_CASE("structured<T> throws when max retries exhausted", "[structured]") {
+TEST_CASE("structured<T> throws AgentRunError when max retries exhausted", "[structured]") {
     auto mock = make_anthropic_mock("not valid json");
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
     AnthropicProvider provider(mock, config);
@@ -141,7 +139,24 @@ TEST_CASE("structured<T> throws when max retries exhausted", "[structured]") {
     Conversation conv;
     conv.add(Message(Role::user, "Test"));
 
-    REQUIRE_THROWS_AS(structured<TestOutput>(provider, conv), std::runtime_error);
+    REQUIRE_THROWS_AS(structured<TestOutput>(provider, conv), AgentRunError);
+}
+
+TEST_CASE("structured<T> parse-exhausted error carries partial state", "[structured]") {
+    auto mock = make_anthropic_mock("not valid json");
+    ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
+    AnthropicProvider provider(mock, config);
+
+    Conversation conv;
+    conv.add(Message(Role::user, "Test"));
+
+    try {
+        structured<TestOutput>(provider, conv, {.max_retries = 1});
+        FAIL("expected AgentRunError");
+    } catch (const AgentRunError& e) {
+        REQUIRE(e.kind() == AgentRunError::Kind::structured_parse);
+        REQUIRE(e.conversation().messages().size() >= 3);
+    }
 }
 
 TEST_CASE("structured<T> throws immediately with max_retries=0", "[structured]") {
@@ -152,8 +167,7 @@ TEST_CASE("structured<T> throws immediately with max_retries=0", "[structured]")
     Conversation conv;
     conv.add(Message(Role::user, "Test"));
 
-    REQUIRE_THROWS_AS(structured<TestOutput>(provider, conv, {.max_retries = 0}),
-                      std::runtime_error);
+    REQUIRE_THROWS_AS(structured<TestOutput>(provider, conv, {.max_retries = 0}), AgentRunError);
 }
 
 TEST_CASE("structured<T> throws when response has no TextBlock", "[structured]") {
@@ -172,8 +186,7 @@ TEST_CASE("structured<T> throws when response has no TextBlock", "[structured]")
     Conversation conv;
     conv.add(Message(Role::user, "Test"));
 
-    REQUIRE_THROWS_AS(structured<TestOutput>(provider, conv, {.max_retries = 0}),
-                      std::runtime_error);
+    REQUIRE_THROWS_AS(structured<TestOutput>(provider, conv, {.max_retries = 0}), AgentRunError);
 }
 
 TEST_CASE("structured<T> preserves prior messages in multi-turn", "[structured]") {
@@ -192,12 +205,12 @@ TEST_CASE("structured<T> preserves prior messages in multi-turn", "[structured]"
     conv.add(Message(Role::user, "Now tell me about Alice"));
 
     auto result = structured<TestOutput>(provider, conv);
-    REQUIRE(result.name == "Alice");
+    REQUIRE(result.output.name == "Alice");
     REQUIRE(captured_body["system"] == "You are helpful.");
     REQUIRE(captured_body["messages"].size() == 3);
 }
 
-TEST_CASE("Anthropic includes output_config when schema provided", "[structured]") {
+TEST_CASE("Anthropic includes output_config when schema provided via ChatRequest", "[structured]") {
     auto mock = make_anthropic_mock(R"({"name": "Test", "age": 1})");
     nlohmann::json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
@@ -207,10 +220,9 @@ TEST_CASE("Anthropic includes output_config when schema provided", "[structured]
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
     AnthropicProvider provider(mock, config);
 
-    auto schema = ParamSchema<TestOutput>::schema();
     Conversation conv;
     conv.add(Message(Role::user, "Test"));
-    provider.chat(conv, schema);
+    provider.chat(conv, ChatRequest{.output_schema = ParamSchema<TestOutput>::schema()});
 
     REQUIRE(captured_body.contains("output_config"));
     REQUIRE(captured_body["output_config"]["format"]["type"] == "json_schema");
@@ -226,12 +238,34 @@ TEST_CASE("OpenAI includes response_format with strict when schema provided", "[
     ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
     OpenAiProvider provider(mock, config);
 
-    auto schema = ParamSchema<TestOutput>::schema();
     Conversation conv;
     conv.add(Message(Role::user, "Test"));
-    provider.chat(conv, schema);
+    provider.chat(conv, ChatRequest{.output_schema = ParamSchema<TestOutput>::schema()});
 
     REQUIRE(captured_body.contains("response_format"));
     REQUIRE(captured_body["response_format"]["type"] == "json_schema");
     REQUIRE(captured_body["response_format"]["json_schema"]["strict"] == true);
+}
+
+TEST_CASE("Provider accepts tools and schema together via ChatRequest", "[structured]") {
+    auto mock = make_anthropic_mock(R"({"name": "Combined", "age": 1})");
+    nlohmann::json captured_body;
+    mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
+        captured_body = nlohmann::json::parse(body);
+    };
+
+    ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
+    AnthropicProvider provider(mock, config);
+
+    Conversation conv;
+    conv.add(Message(Role::user, "Test"));
+
+    std::vector<nlohmann::json> tool_defs = {
+        {{"name", "noop"}, {"description", "do nothing"}, {"input_schema", {{"type", "object"}}}}};
+
+    provider.chat(
+        conv, ChatRequest{.tools = tool_defs, .output_schema = ParamSchema<TestOutput>::schema()});
+
+    REQUIRE(captured_body.contains("tools"));
+    REQUIRE(captured_body.contains("output_config"));
 }

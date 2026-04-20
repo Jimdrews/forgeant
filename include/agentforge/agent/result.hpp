@@ -2,21 +2,19 @@
 #define AGENTFORGE_AGENT_RESULT_HPP
 
 #include <agentforge/provider/response.hpp>
-#include <agentforge/types/message.hpp>
+#include <agentforge/types/conversation.hpp>
 
 #include <string>
 
 namespace agentforge {
 
+template <typename T = std::string>
 struct AgentResult {
-    std::string text;
-    Message message{Role::assistant, ""};
+    T output{};
+    Conversation conversation;
     Usage total_usage;
     int iterations = 0;
     std::string finish_reason;
-    std::string error;
-
-    [[nodiscard]] bool has_error() const { return !error.empty(); }
 };
 
 } // namespace agentforge
