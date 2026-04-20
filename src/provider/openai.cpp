@@ -19,6 +19,14 @@ void serialize_tool_result_messages(nlohmann::json& messages, const Message& msg
     }
 }
 
+nlohmann::json serialize_tool(const ToolView& tool) {
+    return {{"type", "function"},
+            {"function",
+             {{"name", tool.name},
+              {"description", tool.description},
+              {"parameters", tool.parameters}}}};
+}
+
 nlohmann::json serialize_message(const Message& msg) {
     nlohmann::json msg_json;
     msg_json["role"] = msg.role;
@@ -88,7 +96,7 @@ nlohmann::json OpenAiProvider::serialize_request(const Conversation& conversatio
     if (!request.tools.empty()) {
         body["tools"] = nlohmann::json::array();
         for (const auto& tool : request.tools) {
-            body["tools"].push_back(tool);
+            body["tools"].push_back(serialize_tool(tool));
         }
     }
 

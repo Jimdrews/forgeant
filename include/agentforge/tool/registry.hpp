@@ -2,6 +2,7 @@
 #define AGENTFORGE_TOOL_REGISTRY_HPP
 
 #include <agentforge/tool/tool.hpp>
+#include <agentforge/tool/tool_view.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -15,7 +16,7 @@ class ToolRegistry {
     [[nodiscard]] const Tool& get(const std::string& name) const;
     [[nodiscard]] bool has(const std::string& name) const;
     nlohmann::json execute(const std::string& name, const nlohmann::json& args) const;
-    [[nodiscard]] std::vector<nlohmann::json> definitions() const;
+    [[nodiscard]] std::vector<ToolView> tools() const;
     [[nodiscard]] size_t size() const;
 
   private:

@@ -260,11 +260,11 @@ TEST_CASE("Provider accepts tools and schema together via ChatRequest", "[struct
     Conversation conv;
     conv.add(Message(Role::user, "Test"));
 
-    std::vector<nlohmann::json> tool_defs = {
-        {{"name", "noop"}, {"description", "do nothing"}, {"input_schema", {{"type", "object"}}}}};
+    nlohmann::json noop_params = {{"type", "object"}};
+    std::vector<ToolView> tool_views = {ToolView{"noop", "do nothing", noop_params}};
 
     provider.chat(
-        conv, ChatRequest{.tools = tool_defs, .output_schema = ParamSchema<TestOutput>::schema()});
+        conv, ChatRequest{.tools = tool_views, .output_schema = ParamSchema<TestOutput>::schema()});
 
     REQUIRE(captured_body.contains("tools"));
     REQUIRE(captured_body.contains("output_config"));

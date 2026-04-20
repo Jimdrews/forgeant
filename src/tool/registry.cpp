@@ -25,17 +25,13 @@ nlohmann::json ToolRegistry::execute(const std::string& name, const nlohmann::js
     return get(name).execute(args);
 }
 
-std::vector<nlohmann::json> ToolRegistry::definitions() const {
-    std::vector<nlohmann::json> defs;
-    defs.reserve(tools_.size());
+std::vector<ToolView> ToolRegistry::tools() const {
+    std::vector<ToolView> views;
+    views.reserve(tools_.size());
     for (const auto& [name, tool] : tools_) {
-        defs.push_back({{"type", "function"},
-                        {"function",
-                         {{"name", tool.name},
-                          {"description", tool.description},
-                          {"parameters", tool.parameters}}}});
+        views.push_back(ToolView{tool.name, tool.description, tool.parameters});
     }
-    return defs;
+    return views;
 }
 
 size_t ToolRegistry::size() const {

@@ -21,6 +21,7 @@
 #include <agentforge/structured/structured.hpp>
 #include <agentforge/tool/registry.hpp>
 #include <agentforge/tool/tool.hpp>
+#include <agentforge/tool/tool_view.hpp>
 #include <agentforge/types.hpp>
 #include <agentforge/version.hpp>
 

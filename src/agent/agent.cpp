@@ -116,7 +116,7 @@ std::string Agent::extract_last_text(const Conversation& conv) {
 
 Agent::LoopResult Agent::execute_loop(Conversation working, const RunOverrides& overrides,
                                       const std::optional<nlohmann::json>& output_schema) {
-    auto tool_defs = registry_.definitions();
+    auto tool_views = registry_.tools();
     const int max_iterations = overrides.max_iterations.value_or(options_.max_iterations);
 
     LoopResult result;
@@ -124,7 +124,7 @@ Agent::LoopResult Agent::execute_loop(Conversation working, const RunOverrides& 
 
     for (int iteration = 0; iteration < max_iterations; ++iteration) {
         ChatRequest request;
-        request.tools = std::span<const nlohmann::json>(tool_defs);
+        request.tools = std::span<const ToolView>(tool_views);
         request.output_schema = output_schema;
 
         LlmResponse response;

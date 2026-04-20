@@ -214,6 +214,51 @@ TEST_CASE("OpenAI uses custom base URL for compatible endpoints", "[openai]") {
     REQUIRE(captured_url == "http://localhost:11434/v1/chat/completions");
 }
 
+TEST_CASE("OpenAI serializes tools in OpenAI wire shape", "[openai]") {
+    auto mock = make_mock(SIMPLE_RESPONSE);
+    nlohmann::json captured_body;
+    mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
+        captured_body = nlohmann::json::parse(body);
+    };
+
+    ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
+    OpenAiProvider provider(mock, config);
+
+    nlohmann::json weather_params = {{"type", "object"},
+                                     {"properties", {{"city", {{"type", "string"}}}}},
+                                     {"required", nlohmann::json::array({"city"})}};
+    std::vector<ToolView> tool_views = {
+        ToolView{"get_weather", "Get the weather for a city", weather_params}};
+
+    Conversation conv;
+    conv.add(Message(Role::user, "Weather?"));
+    provider.chat(conv, ChatRequest{.tools = tool_views});
+
+    REQUIRE(captured_body.contains("tools"));
+    REQUIRE(captured_body["tools"].size() == 1);
+    REQUIRE(captured_body["tools"][0]["type"] == "function");
+    REQUIRE(captured_body["tools"][0]["function"]["name"] == "get_weather");
+    REQUIRE(captured_body["tools"][0]["function"]["description"] == "Get the weather for a city");
+    REQUIRE(captured_body["tools"][0]["function"]["parameters"] == weather_params);
+}
+
+TEST_CASE("OpenAI omits tools field when empty", "[openai]") {
+    auto mock = make_mock(SIMPLE_RESPONSE);
+    nlohmann::json captured_body;
+    mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
+        captured_body = nlohmann::json::parse(body);
+    };
+
+    ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
+    OpenAiProvider provider(mock, config);
+
+    Conversation conv;
+    conv.add(Message(Role::user, "Hi"));
+    provider.chat(conv);
+
+    REQUIRE_FALSE(captured_body.contains("tools"));
+}
+
 TEST_CASE("OpenAI throws on error response", "[openai]") {
     auto mock = make_mock(
         R"({"error": {"message": "Invalid API key", "type": "invalid_request_error"}})", 401);

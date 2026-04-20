@@ -4,6 +4,15 @@
 
 namespace agentforge {
 
+namespace {
+
+nlohmann::json serialize_tool(const ToolView& tool) {
+    return {
+        {"name", tool.name}, {"description", tool.description}, {"input_schema", tool.parameters}};
+}
+
+} // namespace
+
 AnthropicProvider::AnthropicProvider(HttpClient& client, ProviderConfig config)
     : client_(client), config_(std::move(config)) {
     if (config_.base_url.empty()) {
@@ -48,15 +57,17 @@ nlohmann::json AnthropicProvider::serialize_request(const Conversation& conversa
     if (!request.tools.empty()) {
         body["tools"] = nlohmann::json::array();
         for (const auto& tool : request.tools) {
-            body["tools"].push_back(tool);
+            body["tools"].push_back(serialize_tool(tool));
         }
     }
 
     if (request.output_schema.has_value()) {
+        auto schema_copy = *request.output_schema;
+        if (schema_copy.value("type", "") == "object") {
+            schema_copy["additionalProperties"] = false;
+        }
         body["output_config"] = {
-            {"format",
-             {{"type", "json_schema"},
-              {"json_schema", {{"name", "response"}, {"schema", *request.output_schema}}}}}};
+            {"format", {{"type", "json_schema"}, {"schema", std::move(schema_copy)}}}};
     }
 
     return body;

@@ -44,16 +44,27 @@ TEST_CASE("ToolRegistry execute dispatches by name", "[registry]") {
     REQUIRE(result == "hello");
 }
 
-TEST_CASE("ToolRegistry definitions format", "[registry]") {
+TEST_CASE("ToolRegistry tools returns neutral views", "[registry]") {
     ToolRegistry registry;
     registry.add(make_tool<EchoParams>("echo", "Echo text", [](EchoParams p) { return p.text; }));
 
-    auto defs = registry.definitions();
-    REQUIRE(defs.size() == 1);
-    REQUIRE(defs[0]["type"] == "function");
-    REQUIRE(defs[0]["function"]["name"] == "echo");
-    REQUIRE(defs[0]["function"]["description"] == "Echo text");
-    REQUIRE(defs[0]["function"]["parameters"]["type"] == "object");
+    auto views = registry.tools();
+    REQUIRE(views.size() == 1);
+    REQUIRE(views[0].name == "echo");
+    REQUIRE(views[0].description == "Echo text");
+    REQUIRE(views[0].parameters.at("type") == "object");
+}
+
+TEST_CASE("ToolRegistry tools views borrow from registry storage", "[registry]") {
+    ToolRegistry registry;
+    registry.add(make_tool<EchoParams>("echo", "Echo text", [](EchoParams p) { return p.text; }));
+
+    auto views = registry.tools();
+    REQUIRE(views.size() == 1);
+    const auto& stored = registry.get("echo");
+    REQUIRE(views[0].name.data() == stored.name.data());
+    REQUIRE(views[0].description.data() == stored.description.data());
+    REQUIRE(&views[0].parameters == &stored.parameters);
 }
 
 TEST_CASE("ToolRegistry multi-tool dispatch", "[registry]") {
