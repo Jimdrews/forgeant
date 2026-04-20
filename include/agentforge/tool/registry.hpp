@@ -15,7 +15,7 @@ class ToolRegistry {
     void add(Tool tool);
     [[nodiscard]] const Tool& get(const std::string& name) const;
     [[nodiscard]] bool has(const std::string& name) const;
-    nlohmann::json execute(const std::string& name, const nlohmann::json& args) const;
+    Json execute(const std::string& name, const Json& args) const;
     [[nodiscard]] std::vector<ToolView> tools() const;
     [[nodiscard]] size_t size() const;
 

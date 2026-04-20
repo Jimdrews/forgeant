@@ -43,7 +43,7 @@ TEST_CASE("Conversation JSON round-trip", "[conversation]") {
     original.add(Message(Role::user, "hello"));
     original.add(Message(Role::assistant, "hi there"));
 
-    nlohmann::json j = original;
+    Json j = original;
 
     REQUIRE(j["system_prompt"] == "You are helpful.");
     REQUIRE(j["messages"].size() == 2);
@@ -57,7 +57,7 @@ TEST_CASE("Conversation JSON round-trip without system prompt", "[conversation]"
     Conversation original;
     original.add(Message(Role::user, "hello"));
 
-    nlohmann::json j = original;
+    Json j = original;
     REQUIRE(!j.contains("system_prompt"));
 
     Conversation restored;

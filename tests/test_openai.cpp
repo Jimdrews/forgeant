@@ -45,9 +45,9 @@ const std::string TOOL_CALL_RESPONSE = R"({
 
 TEST_CASE("OpenAI serializes system prompt as system message", "[openai]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "test-key", .model = "gpt-4o"};
@@ -64,9 +64,9 @@ TEST_CASE("OpenAI serializes system prompt as system message", "[openai]") {
 
 TEST_CASE("OpenAI serializes text content as string", "[openai]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
@@ -82,9 +82,9 @@ TEST_CASE("OpenAI serializes text content as string", "[openai]") {
 
 TEST_CASE("OpenAI serializes tool result with tool role", "[openai]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
@@ -102,9 +102,9 @@ TEST_CASE("OpenAI serializes tool result with tool role", "[openai]") {
 
 TEST_CASE("OpenAI includes required fields", "[openai]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
@@ -216,17 +216,17 @@ TEST_CASE("OpenAI uses custom base URL for compatible endpoints", "[openai]") {
 
 TEST_CASE("OpenAI serializes tools in OpenAI wire shape", "[openai]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
     OpenAiProvider provider(mock, config);
 
-    nlohmann::json weather_params = {{"type", "object"},
-                                     {"properties", {{"city", {{"type", "string"}}}}},
-                                     {"required", nlohmann::json::array({"city"})}};
+    Json weather_params = {{"type", "object"},
+                           {"properties", {{"city", {{"type", "string"}}}}},
+                           {"required", Json::array({"city"})}};
     std::vector<ToolView> tool_views = {
         ToolView{"get_weather", "Get the weather for a city", weather_params}};
 
@@ -244,9 +244,9 @@ TEST_CASE("OpenAI serializes tools in OpenAI wire shape", "[openai]") {
 
 TEST_CASE("OpenAI omits tools field when empty", "[openai]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "gpt-4o"};

@@ -9,7 +9,7 @@ struct WeatherParams {
 
 template <>
 struct agentforge::ParamSchema<WeatherParams> {
-    static nlohmann::json schema() {
+    static agentforge::Json schema() {
         return agentforge::Schema::object()
             .property("city", agentforge::Schema::string().description("The city name").build())
             .property("unit", agentforge::Schema::string().description("Temperature unit").build())
@@ -18,7 +18,7 @@ struct agentforge::ParamSchema<WeatherParams> {
     }
 };
 
-inline void from_json(const nlohmann::json& j, WeatherParams& params) {
+inline void from_json(const agentforge::Json& j, WeatherParams& params) {
     j.at("city").get_to(params.city);
     if (j.contains("unit")) {
         j.at("unit").get_to(params.unit);
@@ -35,7 +35,7 @@ TEST_CASE("ParamSchema specialization generates correct schema", "[params]") {
 }
 
 TEST_CASE("ParamSchema with from_json enables deserialization", "[params]") {
-    nlohmann::json j = {{"city", "Denver"}, {"unit", "fahrenheit"}};
+    agentforge::Json j = {{"city", "Denver"}, {"unit", "fahrenheit"}};
     auto params = j.get<WeatherParams>();
     REQUIRE(params.city == "Denver");
     REQUIRE(params.unit == "fahrenheit");

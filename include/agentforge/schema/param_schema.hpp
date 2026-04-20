@@ -15,22 +15,22 @@ struct ParamSchema {
 
 template <>
 struct ParamSchema<std::string> {
-    static nlohmann::json schema() { return Schema::string().build(); }
+    static Json schema() { return Schema::string().build(); }
 };
 
 template <>
 struct ParamSchema<int> {
-    static nlohmann::json schema() { return Schema::integer().build(); }
+    static Json schema() { return Schema::integer().build(); }
 };
 
 template <>
 struct ParamSchema<double> {
-    static nlohmann::json schema() { return Schema::number().build(); }
+    static Json schema() { return Schema::number().build(); }
 };
 
 template <>
 struct ParamSchema<bool> {
-    static nlohmann::json schema() { return Schema::boolean().build(); }
+    static Json schema() { return Schema::boolean().build(); }
 };
 
 } // namespace agentforge

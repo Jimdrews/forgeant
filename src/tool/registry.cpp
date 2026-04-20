@@ -21,7 +21,7 @@ bool ToolRegistry::has(const std::string& name) const {
     return tools_.contains(name);
 }
 
-nlohmann::json ToolRegistry::execute(const std::string& name, const nlohmann::json& args) const {
+Json ToolRegistry::execute(const std::string& name, const Json& args) const {
     return get(name).execute(args);
 }
 

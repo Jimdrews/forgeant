@@ -19,9 +19,9 @@ class OpenAiProvider : public LlmProvider {
 
     static constexpr const char* DEFAULT_BASE_URL = "https://api.openai.com";
 
-    [[nodiscard]] nlohmann::json serialize_request(const Conversation& conversation,
-                                                   const ChatRequest& request) const;
-    [[nodiscard]] static LlmResponse deserialize_response(const nlohmann::json& json);
+    [[nodiscard]] Json serialize_request(const Conversation& conversation,
+                                         const ChatRequest& request) const;
+    [[nodiscard]] static LlmResponse deserialize_response(const Json& json);
     [[nodiscard]] std::string endpoint_url() const;
     [[nodiscard]] HttpHeaders auth_headers() const;
 };

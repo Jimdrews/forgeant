@@ -11,7 +11,7 @@ struct MovieReview {
 
 template <>
 struct agentforge::ParamSchema<MovieReview> {
-    static nlohmann::json schema() {
+    static agentforge::Json schema() {
         return agentforge::Schema::object()
             .property("title", agentforge::Schema::string().description("Movie title").build())
             .property("rating",
@@ -23,7 +23,7 @@ struct agentforge::ParamSchema<MovieReview> {
     }
 };
 
-void from_json(const nlohmann::json& j, MovieReview& review) {
+void from_json(const agentforge::Json& j, MovieReview& review) {
     j.at("title").get_to(review.title);
     j.at("rating").get_to(review.rating);
     j.at("summary").get_to(review.summary);

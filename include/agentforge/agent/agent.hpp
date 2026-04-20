@@ -6,6 +6,7 @@
 #include <agentforge/agent/result.hpp>
 #include <agentforge/agent/run_overrides.hpp>
 #include <agentforge/http/client.hpp>
+#include <agentforge/json/json.hpp>
 #include <agentforge/provider/chat_request.hpp>
 #include <agentforge/provider/provider.hpp>
 #include <agentforge/schema/param_schema.hpp>
@@ -15,7 +16,6 @@
 
 #include <exception>
 #include <memory>
-#include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -66,7 +66,7 @@ class Agent {
     };
 
     LoopResult execute_loop(Conversation working, const RunOverrides& overrides,
-                            const std::optional<nlohmann::json>& output_schema);
+                            const std::optional<Json>& output_schema);
 
     void apply_system_prompt(Conversation& working, const RunOverrides& overrides) const;
 
@@ -101,7 +101,7 @@ class Agent {
 
                 auto text = extract_last_text(working);
                 try {
-                    auto json = nlohmann::json::parse(text);
+                    auto json = Json::parse(text);
                     AgentResult<T> result;
                     result.output = json.template get<T>();
                     result.conversation = std::move(working);

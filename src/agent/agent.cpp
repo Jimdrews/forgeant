@@ -115,7 +115,7 @@ std::string Agent::extract_last_text(const Conversation& conv) {
 }
 
 Agent::LoopResult Agent::execute_loop(Conversation working, const RunOverrides& overrides,
-                                      const std::optional<nlohmann::json>& output_schema) {
+                                      const std::optional<Json>& output_schema) {
     auto tool_views = registry_.tools();
     const int max_iterations = overrides.max_iterations.value_or(options_.max_iterations);
 

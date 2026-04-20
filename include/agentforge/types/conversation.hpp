@@ -30,8 +30,8 @@ class Conversation {
     std::vector<Message> messages_;
 };
 
-void to_json(nlohmann::json& j, const Conversation& conv);
-void from_json(const nlohmann::json& j, Conversation& conv);
+void to_json(Json& j, const Conversation& conv);
+void from_json(const Json& j, Conversation& conv);
 
 } // namespace agentforge
 

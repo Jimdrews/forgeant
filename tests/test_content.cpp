@@ -15,7 +15,7 @@ TEST_CASE("TextBlock creation and equality", "[content]") {
 
 TEST_CASE("TextBlock JSON round-trip", "[content]") {
     TextBlock original{.text = "hello world"};
-    nlohmann::json j = original;
+    Json j = original;
 
     REQUIRE(j["type"] == "text");
     REQUIRE(j["text"] == "hello world");
@@ -26,7 +26,7 @@ TEST_CASE("TextBlock JSON round-trip", "[content]") {
 
 TEST_CASE("ToolUseBlock JSON round-trip", "[content]") {
     ToolUseBlock original("call_123", "get_weather", {{"city", "Denver"}});
-    nlohmann::json j = original;
+    Json j = original;
 
     REQUIRE(j["type"] == "tool_use");
     REQUIRE(j["id"] == "call_123");
@@ -44,7 +44,7 @@ TEST_CASE("ToolResultBlock defaults is_error to false", "[content]") {
 TEST_CASE("ToolResultBlock JSON round-trip", "[content]") {
     ToolResultBlock original{
         .tool_use_id = "call_123", .content = "error: not found", .is_error = true};
-    nlohmann::json j = original;
+    Json j = original;
 
     REQUIRE(j["type"] == "tool_result");
     REQUIRE(j["is_error"] == true);
@@ -55,7 +55,7 @@ TEST_CASE("ToolResultBlock JSON round-trip", "[content]") {
 
 TEST_CASE("ContentBlock variant holds correct alternative", "[content]") {
     ContentBlock text = TextBlock{.text = "hi"};
-    ContentBlock tool_use = ToolUseBlock("1", "test", nlohmann::json::object());
+    ContentBlock tool_use = ToolUseBlock("1", "test", Json::object());
     ContentBlock tool_result = ToolResultBlock{.tool_use_id = "1", .content = "ok"};
 
     REQUIRE(std::holds_alternative<TextBlock>(text));
@@ -65,7 +65,7 @@ TEST_CASE("ContentBlock variant holds correct alternative", "[content]") {
 
 TEST_CASE("ContentBlock JSON round-trip preserves variant type", "[content]") {
     ContentBlock original = ToolUseBlock("1", "test", {{"a", 1}});
-    nlohmann::json j = original;
+    Json j = original;
 
     REQUIRE(j["type"] == "tool_use");
 

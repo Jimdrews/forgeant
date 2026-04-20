@@ -11,7 +11,7 @@ struct AddParams {
 
 template <>
 struct agentforge::ParamSchema<AddParams> {
-    static nlohmann::json schema() {
+    static Json schema() {
         return Schema::object()
             .property("a", Schema::integer().description("First number").build())
             .property("b", Schema::integer().description("Second number").build())
@@ -20,7 +20,7 @@ struct agentforge::ParamSchema<AddParams> {
     }
 };
 
-inline void from_json(const nlohmann::json& j, AddParams& p) {
+inline void from_json(const Json& j, AddParams& p) {
     j.at("a").get_to(p.a);
     j.at("b").get_to(p.b);
 }
@@ -55,9 +55,8 @@ TEST_CASE("make_tool execute with string return", "[tool]") {
 TEST_CASE("Raw tool creation", "[tool]") {
     auto schema = Schema::object().property("x", Schema::integer().build()).build();
 
-    Tool tool(
-        "double_it", "Double a number", schema,
-        [](const nlohmann::json& args) -> nlohmann::json { return args["x"].get<int>() * 2; });
+    Tool tool("double_it", "Double a number", schema,
+              [](const Json& args) -> Json { return args["x"].get<int>() * 2; });
 
     REQUIRE(tool.name == "double_it");
     auto result = tool.execute({{"x", 5}});

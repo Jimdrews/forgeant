@@ -5,7 +5,7 @@
 
 namespace agentforge {
 
-void to_json(nlohmann::json& j, Role role) {
+void to_json(Json& j, Role role) {
     switch (role) {
     case Role::system:
         j = "system";
@@ -22,7 +22,7 @@ void to_json(nlohmann::json& j, Role role) {
     }
 }
 
-void from_json(const nlohmann::json& j, Role& role) {
+void from_json(const Json& j, Role& role) {
     auto s = j.get<std::string>();
     if (s == "system") {
         role = Role::system;

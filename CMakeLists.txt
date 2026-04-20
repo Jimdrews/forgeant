@@ -10,6 +10,7 @@ find_package(nlohmann_json REQUIRED)
 find_package(CURL REQUIRED)
 
 add_library(agentforge
+    src/json/json.cpp
     src/version.cpp
     src/types/role.cpp
     src/types/content.cpp

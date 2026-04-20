@@ -32,7 +32,7 @@ TEST_CASE("Message with multiple content blocks", "[message]") {
 
 TEST_CASE("Message JSON round-trip", "[message]") {
     Message original(Role::assistant, "hello world");
-    nlohmann::json j = original;
+    Json j = original;
 
     REQUIRE(j["role"] == "assistant");
     REQUIRE(j["content"].size() == 1);

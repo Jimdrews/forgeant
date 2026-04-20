@@ -11,7 +11,7 @@ TEST_CASE("Role enum values exist", "[role]") {
 
 TEST_CASE("Role JSON round-trip", "[role]") {
     auto test = [](Role role, const std::string& expected) {
-        nlohmann::json j = role;
+        agentforge::Json j = role;
         REQUIRE(j.get<std::string>() == expected);
 
         auto restored = j.get<Role>();
@@ -25,6 +25,6 @@ TEST_CASE("Role JSON round-trip", "[role]") {
 }
 
 TEST_CASE("Invalid role string throws", "[role]") {
-    nlohmann::json j = "invalid";
+    agentforge::Json j = "invalid";
     REQUIRE_THROWS_AS(j.get<Role>(), std::invalid_argument);
 }

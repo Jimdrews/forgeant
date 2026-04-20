@@ -1,7 +1,8 @@
 #ifndef AGENTFORGE_TYPES_CONTENT_HPP
 #define AGENTFORGE_TYPES_CONTENT_HPP
 
-#include <nlohmann/json.hpp>
+#include <agentforge/json/json.hpp>
+
 #include <string>
 #include <variant>
 
@@ -16,10 +17,10 @@ struct TextBlock {
 struct ToolUseBlock {
     std::string id;
     std::string name;
-    nlohmann::json input;
+    Json input;
 
     ToolUseBlock();
-    ToolUseBlock(std::string id, std::string name, nlohmann::json input);
+    ToolUseBlock(std::string id, std::string name, Json input);
 
     ToolUseBlock(const ToolUseBlock&) = default;
     ToolUseBlock(ToolUseBlock&&) noexcept = default;
@@ -42,17 +43,17 @@ struct ToolResultBlock {
 
 using ContentBlock = std::variant<TextBlock, ToolUseBlock, ToolResultBlock>;
 
-void to_json(nlohmann::json& j, const TextBlock& block);
-void from_json(const nlohmann::json& j, TextBlock& block);
+void to_json(Json& j, const TextBlock& block);
+void from_json(const Json& j, TextBlock& block);
 
-void to_json(nlohmann::json& j, const ToolUseBlock& block);
-void from_json(const nlohmann::json& j, ToolUseBlock& block);
+void to_json(Json& j, const ToolUseBlock& block);
+void from_json(const Json& j, ToolUseBlock& block);
 
-void to_json(nlohmann::json& j, const ToolResultBlock& block);
-void from_json(const nlohmann::json& j, ToolResultBlock& block);
+void to_json(Json& j, const ToolResultBlock& block);
+void from_json(const Json& j, ToolResultBlock& block);
 
-void to_json(nlohmann::json& j, const ContentBlock& block);
-void from_json(const nlohmann::json& j, ContentBlock& block);
+void to_json(Json& j, const ContentBlock& block);
+void from_json(const Json& j, ContentBlock& block);
 
 } // namespace agentforge
 

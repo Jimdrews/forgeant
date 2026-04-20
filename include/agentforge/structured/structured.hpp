@@ -15,7 +15,7 @@
 
 namespace agentforge {
 
-nlohmann::json extract_json_from_response(const LlmResponse& response);
+Json extract_json_from_response(const LlmResponse& response);
 
 template <typename T>
 AgentResult<T> structured(LlmProvider& provider, Conversation working,

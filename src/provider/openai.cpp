@@ -6,11 +6,11 @@ namespace agentforge {
 
 namespace {
 
-void serialize_tool_result_messages(nlohmann::json& messages, const Message& msg) {
+void serialize_tool_result_messages(Json& messages, const Message& msg) {
     for (const auto& block : msg.content) {
         if (std::holds_alternative<ToolResultBlock>(block)) {
             const auto& result = std::get<ToolResultBlock>(block);
-            nlohmann::json tool_msg;
+            Json tool_msg;
             tool_msg["role"] = "tool";
             tool_msg["tool_call_id"] = result.tool_use_id;
             tool_msg["content"] = result.content;
@@ -19,7 +19,7 @@ void serialize_tool_result_messages(nlohmann::json& messages, const Message& msg
     }
 }
 
-nlohmann::json serialize_tool(const ToolView& tool) {
+Json serialize_tool(const ToolView& tool) {
     return {{"type", "function"},
             {"function",
              {{"name", tool.name},
@@ -27,12 +27,12 @@ nlohmann::json serialize_tool(const ToolView& tool) {
               {"parameters", tool.parameters}}}};
 }
 
-nlohmann::json serialize_message(const Message& msg) {
-    nlohmann::json msg_json;
+Json serialize_message(const Message& msg) {
+    Json msg_json;
     msg_json["role"] = msg.role;
 
     std::string text_content;
-    nlohmann::json tool_calls = nlohmann::json::array();
+    Json tool_calls = Json::array();
 
     for (const auto& block : msg.content) {
         if (std::holds_alternative<TextBlock>(block)) {
@@ -48,8 +48,7 @@ nlohmann::json serialize_message(const Message& msg) {
 
     if (!tool_calls.empty()) {
         msg_json["tool_calls"] = std::move(tool_calls);
-        msg_json["content"] =
-            text_content.empty() ? nlohmann::json(nullptr) : nlohmann::json(text_content);
+        msg_json["content"] = text_content.empty() ? Json(nullptr) : Json(text_content);
     } else {
         msg_json["content"] = text_content;
     }
@@ -66,9 +65,9 @@ OpenAiProvider::OpenAiProvider(HttpClient& client, ProviderConfig config)
     }
 }
 
-nlohmann::json OpenAiProvider::serialize_request(const Conversation& conversation,
-                                                 const ChatRequest& request) const {
-    nlohmann::json body;
+Json OpenAiProvider::serialize_request(const Conversation& conversation,
+                                       const ChatRequest& request) const {
+    Json body;
     body["model"] = config_.model;
 
     if (config_.max_tokens.has_value()) {
@@ -79,7 +78,7 @@ nlohmann::json OpenAiProvider::serialize_request(const Conversation& conversatio
         body["temperature"] = config_.temperature.value();
     }
 
-    auto& messages = body["messages"] = nlohmann::json::array();
+    auto& messages = body["messages"] = Json::array();
 
     if (const auto& sp = conversation.system_prompt()) {
         messages.push_back({{"role", "system"}, {"content", *sp}});
@@ -94,7 +93,7 @@ nlohmann::json OpenAiProvider::serialize_request(const Conversation& conversatio
     }
 
     if (!request.tools.empty()) {
-        body["tools"] = nlohmann::json::array();
+        body["tools"] = Json::array();
         for (const auto& tool : request.tools) {
             body["tools"].push_back(serialize_tool(tool));
         }
@@ -114,7 +113,7 @@ nlohmann::json OpenAiProvider::serialize_request(const Conversation& conversatio
     return body;
 }
 
-LlmResponse OpenAiProvider::deserialize_response(const nlohmann::json& json) {
+LlmResponse OpenAiProvider::deserialize_response(const Json& json) {
     LlmResponse response;
     response.model = json.value("model", "");
 
@@ -137,10 +136,10 @@ LlmResponse OpenAiProvider::deserialize_response(const nlohmann::json& json) {
     if (msg.contains("tool_calls")) {
         for (const auto& tc : msg["tool_calls"]) {
             const auto& func = tc["function"];
-            auto args = nlohmann::json::object();
+            auto args = Json::object();
             if (func.contains("arguments") && func["arguments"].is_string()) {
                 try {
-                    args = nlohmann::json::parse(func["arguments"].get<std::string>());
+                    args = Json::parse(func["arguments"].get<std::string>());
                 } catch (...) {
                     args = {{"_raw", func["arguments"].get<std::string>()}};
                 }
@@ -180,7 +179,7 @@ LlmResponse OpenAiProvider::chat(const Conversation& conversation, const ChatReq
             "OpenAI API error (HTTP " + std::to_string(http_response.status_code) + ")";
         if (!http_response.body.empty()) {
             try {
-                auto err_json = nlohmann::json::parse(http_response.body);
+                auto err_json = Json::parse(http_response.body);
                 if (err_json.contains("error") && err_json["error"].contains("message")) {
                     error_msg += ": " + err_json["error"]["message"].get<std::string>();
                 }
@@ -191,7 +190,7 @@ LlmResponse OpenAiProvider::chat(const Conversation& conversation, const ChatReq
         throw std::runtime_error(error_msg);
     }
 
-    auto response_json = nlohmann::json::parse(http_response.body);
+    auto response_json = Json::parse(http_response.body);
     return deserialize_response(response_json);
 }
 

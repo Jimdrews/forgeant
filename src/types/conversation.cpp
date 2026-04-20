@@ -2,8 +2,8 @@
 
 namespace agentforge {
 
-void to_json(nlohmann::json& j, const Conversation& conv) {
-    j = {{"messages", nlohmann::json::array()}};
+void to_json(Json& j, const Conversation& conv) {
+    j = {{"messages", Json::array()}};
     if (const auto& sp = conv.system_prompt()) {
         j["system_prompt"] = *sp;
     }
@@ -12,7 +12,7 @@ void to_json(nlohmann::json& j, const Conversation& conv) {
     }
 }
 
-void from_json(const nlohmann::json& j, Conversation& conv) {
+void from_json(const Json& j, Conversation& conv) {
     if (j.contains("system_prompt")) {
         conv.set_system_prompt(j.at("system_prompt").get<std::string>());
     }

@@ -2,6 +2,7 @@ find_package(Catch2 3 REQUIRED)
 find_package(httplib REQUIRED)
 
 add_executable(agentforge_tests
+    test_json.cpp
     test_version.cpp
     test_role.cpp
     test_content.cpp

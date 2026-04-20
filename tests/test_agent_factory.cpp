@@ -49,7 +49,7 @@ TEST_CASE("Agent::create with tools", "[factory]") {
     AgentOptions options{.api_key = "key", .model = "model"};
     auto agent = Agent::create("anthropic", options);
     agent->add_tool(Tool("test", "A test tool", Schema::object().build(),
-                         [](const nlohmann::json&) -> nlohmann::json { return "ok"; }));
+                         [](const Json&) -> Json { return "ok"; }));
     REQUIRE(agent != nullptr);
 }
 

@@ -10,7 +10,7 @@ struct EchoParams {
 
 template <>
 struct agentforge::ParamSchema<EchoParams> {
-    static nlohmann::json schema() {
+    static Json schema() {
         return Schema::object()
             .property("text", Schema::string().build())
             .required({"text"})
@@ -18,7 +18,7 @@ struct agentforge::ParamSchema<EchoParams> {
     }
 };
 
-inline void from_json(const nlohmann::json& j, EchoParams& p) {
+inline void from_json(const Json& j, EchoParams& p) {
     j.at("text").get_to(p.text);
 }
 
@@ -72,7 +72,7 @@ TEST_CASE("ToolRegistry multi-tool dispatch", "[registry]") {
     registry.add(make_tool<EchoParams>("echo", "Echo", [](EchoParams p) { return p.text; }));
     registry.add(Tool("upper", "Uppercase",
                       Schema::object().property("text", Schema::string().build()).build(),
-                      [](const nlohmann::json& args) -> nlohmann::json {
+                      [](const Json& args) -> Json {
                           auto text = args["text"].get<std::string>();
                           std::transform(text.begin(), text.end(), text.begin(), ::toupper);
                           return text;

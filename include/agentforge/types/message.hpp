@@ -23,8 +23,8 @@ struct Message {
     bool operator==(const Message&) const = default;
 };
 
-void to_json(nlohmann::json& j, const Message& msg);
-void from_json(const nlohmann::json& j, Message& msg);
+void to_json(Json& j, const Message& msg);
+void from_json(const Json& j, Message& msg);
 
 } // namespace agentforge
 

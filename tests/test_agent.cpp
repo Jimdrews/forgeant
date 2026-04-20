@@ -16,7 +16,7 @@ struct AddParams {
 
 template <>
 struct agentforge::ParamSchema<AddParams> {
-    static nlohmann::json schema() {
+    static Json schema() {
         return Schema::object()
             .property("a", Schema::integer().build())
             .property("b", Schema::integer().build())
@@ -24,7 +24,7 @@ struct agentforge::ParamSchema<AddParams> {
     }
 };
 
-inline void from_json(const nlohmann::json& j, AddParams& p) {
+inline void from_json(const Json& j, AddParams& p) {
     j.at("a").get_to(p.a);
     j.at("b").get_to(p.b);
 }
@@ -54,8 +54,7 @@ LlmResponse text_response(const std::string& text, int input_tok = 10, int outpu
 }
 
 LlmResponse tool_call_response(const std::string& tool_id, const std::string& tool_name,
-                               const nlohmann::json& input, int input_tok = 10,
-                               int output_tok = 5) {
+                               const Json& input, int input_tok = 10, int output_tok = 5) {
     LlmResponse r;
     r.message = Message(Role::assistant,
                         std::vector<ContentBlock>{ToolUseBlock(tool_id, tool_name, input)});
@@ -124,9 +123,8 @@ TEST_CASE("Agent tool error wrapping", "[agent]") {
     provider.responses.push(text_response("Sorry, that failed."));
 
     Agent agent(provider);
-    agent.add_tool(Tool(
-        "fail", "Always fails", Schema::object().build(),
-        [](const nlohmann::json&) -> nlohmann::json { throw std::runtime_error("tool broke"); }));
+    agent.add_tool(Tool("fail", "Always fails", Schema::object().build(),
+                        [](const Json&) -> Json { throw std::runtime_error("tool broke"); }));
     auto result = agent.run("Try the tool");
 
     REQUIRE(result.output == "Sorry, that failed.");

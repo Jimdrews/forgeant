@@ -9,7 +9,7 @@ struct BenchParams {
 
 template <>
 struct agentforge::ParamSchema<BenchParams> {
-    static nlohmann::json schema() {
+    static agentforge::Json schema() {
         return agentforge::Schema::object()
             .property("text", agentforge::Schema::string().build())
             .property("count", agentforge::Schema::integer().build())
@@ -17,7 +17,7 @@ struct agentforge::ParamSchema<BenchParams> {
     }
 };
 
-inline void from_json(const nlohmann::json& j, BenchParams& p) {
+inline void from_json(const agentforge::Json& j, BenchParams& p) {
     j.at("text").get_to(p.text);
     j.at("count").get_to(p.count);
 }
@@ -26,7 +26,7 @@ static void BM_ToolDispatch(benchmark::State& state) {
     agentforge::ToolRegistry registry;
     registry.add(
         agentforge::make_tool<BenchParams>("echo", "Echo", [](BenchParams p) { return p.text; }));
-    nlohmann::json args = {{"text", "hello"}, {"count", 1}};
+    agentforge::Json args = {{"text", "hello"}, {"count", 1}};
 
     for (auto _ : state) {
         auto result = registry.execute("echo", args);
@@ -52,7 +52,7 @@ static void BM_RegistryLookup(benchmark::State& state) {
     for (int i = 0; i < 100; i++) {
         registry.add(agentforge::Tool(
             "tool_" + std::to_string(i), "desc", agentforge::Schema::object().build(),
-            [](const nlohmann::json&) -> nlohmann::json { return nullptr; }));
+            [](const agentforge::Json&) -> agentforge::Json { return nullptr; }));
     }
 
     for (auto _ : state) {

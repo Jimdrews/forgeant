@@ -16,7 +16,7 @@ struct TestOutput {
 
 template <>
 struct agentforge::ParamSchema<TestOutput> {
-    static nlohmann::json schema() {
+    static Json schema() {
         return Schema::object()
             .property("name", Schema::string().build())
             .property("age", Schema::integer().build())
@@ -25,7 +25,7 @@ struct agentforge::ParamSchema<TestOutput> {
     }
 };
 
-inline void from_json(const nlohmann::json& j, TestOutput& out) {
+inline void from_json(const Json& j, TestOutput& out) {
     j.at("name").get_to(out.name);
     j.at("age").get_to(out.age);
 }
@@ -34,10 +34,10 @@ namespace {
 
 testing::MockHttpClient make_anthropic_mock(const std::string& json_content, int status = 200) {
     testing::MockHttpClient mock;
-    nlohmann::json response_body = {{"content", {{{"type", "text"}, {"text", json_content}}}},
-                                    {"model", "claude-sonnet-4-20250514"},
-                                    {"stop_reason", "end_turn"},
-                                    {"usage", {{"input_tokens", 10}, {"output_tokens", 5}}}};
+    Json response_body = {{"content", {{{"type", "text"}, {"text", json_content}}}},
+                          {"model", "claude-sonnet-4-20250514"},
+                          {"stop_reason", "end_turn"},
+                          {"usage", {{"input_tokens", 10}, {"output_tokens", 5}}}};
     mock.canned_response.status_code = status;
     mock.canned_response.body = response_body.dump();
     return mock;
@@ -45,12 +45,11 @@ testing::MockHttpClient make_anthropic_mock(const std::string& json_content, int
 
 testing::MockHttpClient make_openai_mock(const std::string& json_content, int status = 200) {
     testing::MockHttpClient mock;
-    nlohmann::json response_body = {
-        {"choices",
-         {{{"message", {{"role", "assistant"}, {"content", json_content}}},
-           {"finish_reason", "stop"}}}},
-        {"model", "gpt-4o"},
-        {"usage", {{"prompt_tokens", 10}, {"completion_tokens", 5}}}};
+    Json response_body = {{"choices",
+                           {{{"message", {{"role", "assistant"}, {"content", json_content}}},
+                             {"finish_reason", "stop"}}}},
+                          {"model", "gpt-4o"},
+                          {"usage", {{"prompt_tokens", 10}, {"completion_tokens", 5}}}};
     mock.canned_response.status_code = status;
     mock.canned_response.body = response_body.dump();
     return mock;
@@ -100,11 +99,11 @@ TEST_CASE("structured<T> retries on parse failure", "[structured]") {
     testing::MockHttpClient mock;
     int call_count = 0;
 
-    nlohmann::json bad_response = {{"content", {{{"type", "text"}, {"text", "not json"}}}},
-                                   {"model", "claude-sonnet-4-20250514"},
-                                   {"stop_reason", "end_turn"},
-                                   {"usage", {{"input_tokens", 10}, {"output_tokens", 5}}}};
-    nlohmann::json good_response = {
+    Json bad_response = {{"content", {{{"type", "text"}, {"text", "not json"}}}},
+                         {"model", "claude-sonnet-4-20250514"},
+                         {"stop_reason", "end_turn"},
+                         {"usage", {{"input_tokens", 10}, {"output_tokens", 5}}}};
+    Json good_response = {
         {"content", {{{"type", "text"}, {"text", R"({"name": "Fixed", "age": 1})"}}}},
         {"model", "claude-sonnet-4-20250514"},
         {"stop_reason", "end_turn"},
@@ -172,7 +171,7 @@ TEST_CASE("structured<T> throws immediately with max_retries=0", "[structured]")
 
 TEST_CASE("structured<T> throws when response has no TextBlock", "[structured]") {
     testing::MockHttpClient mock;
-    nlohmann::json response_body = {
+    Json response_body = {
         {"content", {{{"type", "tool_use"}, {"id", "1"}, {"name", "x"}, {"input", {}}}}},
         {"model", "claude-sonnet-4-20250514"},
         {"stop_reason", "tool_use"},
@@ -191,9 +190,9 @@ TEST_CASE("structured<T> throws when response has no TextBlock", "[structured]")
 
 TEST_CASE("structured<T> preserves prior messages in multi-turn", "[structured]") {
     auto mock = make_anthropic_mock(R"({"name": "Alice", "age": 30})");
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
@@ -212,9 +211,9 @@ TEST_CASE("structured<T> preserves prior messages in multi-turn", "[structured]"
 
 TEST_CASE("Anthropic includes output_config when schema provided via ChatRequest", "[structured]") {
     auto mock = make_anthropic_mock(R"({"name": "Test", "age": 1})");
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
@@ -230,9 +229,9 @@ TEST_CASE("Anthropic includes output_config when schema provided via ChatRequest
 
 TEST_CASE("OpenAI includes response_format with strict when schema provided", "[structured]") {
     auto mock = make_openai_mock(R"({"name": "Test", "age": 1})");
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
@@ -249,9 +248,9 @@ TEST_CASE("OpenAI includes response_format with strict when schema provided", "[
 
 TEST_CASE("Provider accepts tools and schema together via ChatRequest", "[structured]") {
     auto mock = make_anthropic_mock(R"({"name": "Combined", "age": 1})");
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
@@ -260,7 +259,7 @@ TEST_CASE("Provider accepts tools and schema together via ChatRequest", "[struct
     Conversation conv;
     conv.add(Message(Role::user, "Test"));
 
-    nlohmann::json noop_params = {{"type", "object"}};
+    Json noop_params = {{"type", "object"}};
     std::vector<ToolView> tool_views = {ToolView{"noop", "do nothing", noop_params}};
 
     provider.chat(

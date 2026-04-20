@@ -13,7 +13,7 @@ struct BenchOutput {
 
 template <>
 struct agentforge::ParamSchema<BenchOutput> {
-    static nlohmann::json schema() {
+    static agentforge::Json schema() {
         return agentforge::Schema::object()
             .property("city", agentforge::Schema::string().build())
             .property("temperature", agentforge::Schema::number().build())
@@ -23,7 +23,7 @@ struct agentforge::ParamSchema<BenchOutput> {
     }
 };
 
-inline void from_json(const nlohmann::json& j, BenchOutput& out) {
+inline void from_json(const agentforge::Json& j, BenchOutput& out) {
     j.at("city").get_to(out.city);
     j.at("temperature").get_to(out.temperature);
     j.at("unit").get_to(out.unit);
@@ -31,7 +31,7 @@ inline void from_json(const nlohmann::json& j, BenchOutput& out) {
 
 static void BM_StructuredDeserialization(benchmark::State& state) {
     agentforge::testing::MockHttpClient mock;
-    nlohmann::json response = {
+    agentforge::Json response = {
         {"content",
          {{{"type", "text"},
            {"text", R"({"city":"Denver","temperature":72.5,"unit":"fahrenheit"})"}}}},

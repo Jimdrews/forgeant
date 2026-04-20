@@ -10,7 +10,7 @@ struct WeatherParams {
 
 template <>
 struct agentforge::ParamSchema<WeatherParams> {
-    static nlohmann::json schema() {
+    static agentforge::Json schema() {
         return agentforge::Schema::object()
             .property("city", agentforge::Schema::string().description("The city name").build())
             .property("unit", agentforge::Schema::string()
@@ -23,7 +23,7 @@ struct agentforge::ParamSchema<WeatherParams> {
     }
 };
 
-void from_json(const nlohmann::json& j, WeatherParams& params) {
+void from_json(const agentforge::Json& j, WeatherParams& params) {
     j.at("city").get_to(params.city);
     if (j.contains("unit")) {
         j.at("unit").get_to(params.unit);

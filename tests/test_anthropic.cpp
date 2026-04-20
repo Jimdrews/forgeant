@@ -36,9 +36,9 @@ const std::string TOOL_USE_RESPONSE = R"({
 
 TEST_CASE("Anthropic serializes system prompt as top-level param", "[anthropic]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "test-key", .model = "claude-sonnet-4-20250514"};
@@ -55,9 +55,9 @@ TEST_CASE("Anthropic serializes system prompt as top-level param", "[anthropic]"
 
 TEST_CASE("Anthropic serializes content as block arrays", "[anthropic]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
@@ -75,9 +75,9 @@ TEST_CASE("Anthropic serializes content as block arrays", "[anthropic]") {
 
 TEST_CASE("Anthropic maps Role::tool to user", "[anthropic]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
@@ -93,9 +93,9 @@ TEST_CASE("Anthropic maps Role::tool to user", "[anthropic]") {
 
 TEST_CASE("Anthropic includes required fields", "[anthropic]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
@@ -194,17 +194,17 @@ TEST_CASE("Anthropic uses default base URL", "[anthropic]") {
 
 TEST_CASE("Anthropic serializes tools in Anthropic wire shape", "[anthropic]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
     AnthropicProvider provider(mock, config);
 
-    nlohmann::json weather_params = {{"type", "object"},
-                                     {"properties", {{"city", {{"type", "string"}}}}},
-                                     {"required", nlohmann::json::array({"city"})}};
+    Json weather_params = {{"type", "object"},
+                           {"properties", {{"city", {{"type", "string"}}}}},
+                           {"required", Json::array({"city"})}};
     std::vector<ToolView> tool_views = {
         ToolView{"get_weather", "Get the weather for a city", weather_params}};
 
@@ -224,9 +224,9 @@ TEST_CASE("Anthropic serializes tools in Anthropic wire shape", "[anthropic]") {
 
 TEST_CASE("Anthropic omits tools field when empty", "[anthropic]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
@@ -241,15 +241,15 @@ TEST_CASE("Anthropic omits tools field when empty", "[anthropic]") {
 
 TEST_CASE("Anthropic output_config places schema directly under format", "[anthropic]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
     AnthropicProvider provider(mock, config);
 
-    nlohmann::json schema = {{"type", "object"}, {"properties", {{"name", {{"type", "string"}}}}}};
+    Json schema = {{"type", "object"}, {"properties", {{"name", {{"type", "string"}}}}}};
 
     Conversation conv;
     conv.add(Message(Role::user, "Give me JSON"));
@@ -266,15 +266,15 @@ TEST_CASE("Anthropic output_config places schema directly under format", "[anthr
 
 TEST_CASE("Anthropic leaves non-object schemas unchanged", "[anthropic]") {
     auto mock = make_mock(SIMPLE_RESPONSE);
-    nlohmann::json captured_body;
+    Json captured_body;
     mock.on_post = [&](const std::string&, const HttpHeaders&, const std::string& body) {
-        captured_body = nlohmann::json::parse(body);
+        captured_body = Json::parse(body);
     };
 
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
     AnthropicProvider provider(mock, config);
 
-    nlohmann::json schema = {{"type", "string"}};
+    Json schema = {{"type", "string"}};
 
     Conversation conv;
     conv.add(Message(Role::user, "Give me JSON"));
@@ -290,8 +290,8 @@ TEST_CASE("Anthropic does not mutate caller's schema", "[anthropic]") {
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
     AnthropicProvider provider(mock, config);
 
-    nlohmann::json schema = {{"type", "object"}, {"properties", {{"name", {{"type", "string"}}}}}};
-    nlohmann::json schema_before = schema;
+    Json schema = {{"type", "object"}, {"properties", {{"name", {{"type", "string"}}}}}};
+    Json schema_before = schema;
 
     Conversation conv;
     conv.add(Message(Role::user, "Give me JSON"));

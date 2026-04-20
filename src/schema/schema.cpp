@@ -11,41 +11,41 @@ SchemaBuilder& SchemaBuilder::description(std::string_view desc) {
     return *this;
 }
 
-SchemaBuilder& SchemaBuilder::default_value(const nlohmann::json& value) {
+SchemaBuilder& SchemaBuilder::default_value(const Json& value) {
     schema_["default"] = value;
     return *this;
 }
 
 SchemaBuilder& SchemaBuilder::enum_values(std::initializer_list<std::string> values) {
-    schema_["enum"] = nlohmann::json::array();
+    schema_["enum"] = Json::array();
     for (const auto& v : values) {
         schema_["enum"].push_back(v);
     }
     return *this;
 }
 
-SchemaBuilder& SchemaBuilder::property(const std::string& name, const nlohmann::json& prop_schema) {
+SchemaBuilder& SchemaBuilder::property(const std::string& name, const Json& prop_schema) {
     if (!schema_.contains("properties")) {
-        schema_["properties"] = nlohmann::json::object();
+        schema_["properties"] = Json::object();
     }
     schema_["properties"][name] = prop_schema;
     return *this;
 }
 
 SchemaBuilder& SchemaBuilder::required(std::initializer_list<std::string> fields) {
-    schema_["required"] = nlohmann::json::array();
+    schema_["required"] = Json::array();
     for (const auto& f : fields) {
         schema_["required"].push_back(f);
     }
     return *this;
 }
 
-SchemaBuilder& SchemaBuilder::items(const nlohmann::json& item_schema) {
+SchemaBuilder& SchemaBuilder::items(const Json& item_schema) {
     schema_["items"] = item_schema;
     return *this;
 }
 
-nlohmann::json SchemaBuilder::build() const {
+Json SchemaBuilder::build() const {
     return schema_;
 }
 
