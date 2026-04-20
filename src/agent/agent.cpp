@@ -100,12 +100,11 @@ void Agent::apply_system_prompt(Conversation& working, const RunOverrides& overr
 }
 
 std::string Agent::extract_last_text(const Conversation& conv) {
-    const auto messages = conv.messages();
-    for (auto it = messages.rbegin(); it != messages.rend(); ++it) {
-        if (it->role != Role::assistant) {
+    for (const auto& msg : std::ranges::reverse_view(conv.messages())) {
+        if (msg.role != Role::assistant) {
             continue;
         }
-        for (const auto& block : it->content) {
+        for (const auto& block : msg.content) {
             if (std::holds_alternative<TextBlock>(block)) {
                 return std::get<TextBlock>(block).text;
             }
@@ -117,7 +116,7 @@ std::string Agent::extract_last_text(const Conversation& conv) {
 Agent::LoopResult Agent::execute_loop(Conversation working, const RunOverrides& overrides,
                                       const std::optional<Json>& output_schema) {
     auto tool_views = registry_.tools();
-    const int max_iterations = overrides.max_iterations.value_or(options_.max_iterations);
+    int max_iterations = overrides.max_iterations.value_or(options_.max_iterations);
 
     LoopResult result;
     Usage accumulated;

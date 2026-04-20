@@ -18,7 +18,7 @@ class AgentRunError : public std::runtime_error {
         structured_parse,
     };
 
-    AgentRunError(Kind kind, std::string message, Conversation conversation, Usage usage,
+    AgentRunError(Kind kind, const std::string& message, Conversation conversation, Usage usage,
                   int iterations, std::string finish_reason);
 
     [[nodiscard]] Kind kind() const noexcept { return kind_; }
