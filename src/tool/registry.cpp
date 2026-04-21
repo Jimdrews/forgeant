@@ -29,7 +29,8 @@ std::vector<ToolView> ToolRegistry::tools() const {
     std::vector<ToolView> views;
     views.reserve(tools_.size());
     for (const auto& [name, tool] : tools_) {
-        views.push_back(ToolView{tool.name, tool.description, tool.parameters});
+        views.push_back(ToolView{
+            .name = tool.name, .description = tool.description, .parameters = tool.parameters});
     }
     return views;
 }

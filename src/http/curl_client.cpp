@@ -134,7 +134,7 @@ HttpResponse CurlHttpClient::perform_post(void* curl_handle, const std::string& 
 
     HttpResponse response;
     std::string response_body;
-    WriteContext write_ctx{&response_body, on_chunk};
+    WriteContext write_ctx{.body = &response_body, .on_chunk = on_chunk};
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &write_ctx);

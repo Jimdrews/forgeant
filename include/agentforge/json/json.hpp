@@ -218,7 +218,7 @@ class Json {
     [[nodiscard]] std::string dump() const;
     static Json parse(std::string_view input);
 
-    static Json array() { return Json(array_t{}); }
+    static Json array() { return {array_t{}}; }
 
     static Json array(std::initializer_list<Json> init) {
         array_t arr;
@@ -226,16 +226,16 @@ class Json {
         for (const auto& elem : init) {
             arr.push_back(elem);
         }
-        return Json(std::move(arr));
+        return {std::move(arr)};
     }
-    static Json object() { return Json(object_t{}); }
+    static Json object() { return {object_t{}}; }
 
     static Json object(std::initializer_list<std::pair<const std::string, Json>> init) {
         object_t obj;
         for (const auto& [key, val] : init) {
             obj.emplace(key, val);
         }
-        return Json(std::move(obj));
+        return {std::move(obj)};
     }
 
   private:

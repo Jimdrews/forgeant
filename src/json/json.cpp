@@ -1,5 +1,6 @@
 #include <agentforge/json/json.hpp>
 
+#include <array>
 #include <charconv>
 #include <cmath>
 #include <cstdio>
@@ -17,31 +18,31 @@ Json from_generic(const glz::generic& g) {
         [](const auto& val) -> Json {
             using T = std::decay_t<decltype(val)>;
             if constexpr (std::is_same_v<T, std::nullptr_t>) {
-                return Json(nullptr);
+                return {nullptr};
             } else if constexpr (std::is_same_v<T, bool>) {
-                return Json(val);
+                return Json{val};
             } else if constexpr (std::is_same_v<T, double>) {
                 if (val == std::floor(val) && std::isfinite(val) &&
                     val >= static_cast<double>(std::numeric_limits<Json::integer_t>::min()) &&
                     val <= static_cast<double>(std::numeric_limits<Json::integer_t>::max())) {
-                    return Json(static_cast<Json::integer_t>(val));
+                    return Json{static_cast<Json::integer_t>(val)};
                 }
-                return Json(val);
+                return Json{val};
             } else if constexpr (std::is_same_v<T, std::string>) {
-                return Json(val);
+                return Json{val};
             } else if constexpr (std::is_same_v<T, glz::generic::array_t>) {
                 Json::array_t arr;
                 arr.reserve(val.size());
                 for (const auto& elem : val) {
                     arr.push_back(from_generic(elem));
                 }
-                return Json(std::move(arr));
+                return {std::move(arr)};
             } else if constexpr (std::is_same_v<T, glz::generic::object_t>) {
                 Json::object_t obj;
                 for (const auto& [key, elem] : val) {
                     obj.emplace(key, from_generic(elem));
                 }
-                return Json(std::move(obj));
+                return {std::move(obj)};
             }
         },
         g.data);
@@ -74,9 +75,9 @@ void write_string(std::string& out, const std::string& s) {
             break;
         default:
             if (static_cast<unsigned char>(c) < 0x20) {
-                char buf[8];
-                std::snprintf(buf, sizeof(buf), "\\u%04x", static_cast<unsigned char>(c));
-                out += buf;
+                std::array<char, 8> buf{};
+                std::snprintf(buf.data(), buf.size(), "\\u%04x", static_cast<unsigned char>(c));
+                out += buf.data();
             } else {
                 out += c;
             }
@@ -96,14 +97,14 @@ void Json::write_to(std::string& out) const {
             } else if constexpr (std::is_same_v<T, boolean_t>) {
                 out += val ? "true" : "false";
             } else if constexpr (std::is_same_v<T, integer_t>) {
-                char buf[32];
-                auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), val);
-                out.append(buf, ptr);
+                std::array<char, 32> buf{};
+                auto [ptr, ec] = std::to_chars(buf.data(), buf.data() + buf.size(), val);
+                out.append(buf.data(), ptr);
             } else if constexpr (std::is_same_v<T, number_t>) {
-                char buf[32];
-                auto [ptr, ec] =
-                    std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::general);
-                out.append(buf, ptr);
+                std::array<char, 32> buf{};
+                auto [ptr, ec] = std::to_chars(buf.data(), buf.data() + buf.size(), val,
+                                               std::chars_format::general);
+                out.append(buf.data(), ptr);
             } else if constexpr (std::is_same_v<T, string_t>) {
                 write_string(out, val);
             } else if constexpr (std::is_same_v<T, array_t>) {
