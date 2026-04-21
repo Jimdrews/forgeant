@@ -22,8 +22,9 @@ TEST_CASE("Message convenience constructor from string", "[message]") {
 
 TEST_CASE("Message with multiple content blocks", "[message]") {
     Message msg(Role::assistant,
-                std::vector<ContentBlock>{TextBlock{.text = "Let me check."},
-                                          ToolUseBlock("1", "weather", {{"city", "Denver"}})});
+                std::vector<ContentBlock>{
+                    TextBlock{.text = "Let me check."},
+                    ToolUseBlock("1", "weather", Json::object({{"city", "Denver"}}))});
 
     REQUIRE(msg.content.size() == 2);
     REQUIRE(std::holds_alternative<TextBlock>(msg.content[0]));
@@ -32,7 +33,8 @@ TEST_CASE("Message with multiple content blocks", "[message]") {
 
 TEST_CASE("Message JSON round-trip", "[message]") {
     Message original(Role::assistant, "hello world");
-    Json j = original;
+    Json j;
+    to_json(j, original);
 
     REQUIRE(j["role"] == "assistant");
     REQUIRE(j["content"].size() == 1);

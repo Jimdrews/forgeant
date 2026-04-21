@@ -31,13 +31,14 @@ inline void from_json(const agentforge::Json& j, BenchOutput& out) {
 
 static void BM_StructuredDeserialization(benchmark::State& state) {
     agentforge::testing::MockHttpClient mock;
-    agentforge::Json response = {
-        {"content",
-         {{{"type", "text"},
-           {"text", R"({"city":"Denver","temperature":72.5,"unit":"fahrenheit"})"}}}},
-        {"model", "claude-sonnet-4-20250514"},
-        {"stop_reason", "end_turn"},
-        {"usage", {{"input_tokens", 10}, {"output_tokens", 5}}}};
+    agentforge::Json response = agentforge::Json::object(
+        {{"content",
+          agentforge::Json::array({agentforge::Json::object(
+              {{"type", "text"},
+               {"text", R"({"city":"Denver","temperature":72.5,"unit":"fahrenheit"})"}})})},
+         {"model", "claude-sonnet-4-20250514"},
+         {"stop_reason", "end_turn"},
+         {"usage", agentforge::Json::object({{"input_tokens", 10}, {"output_tokens", 5}})}});
     mock.canned_response.status_code = 200;
     mock.canned_response.body = response.dump();
 

@@ -13,7 +13,8 @@ BENCHMARK(BM_MessageCreate);
 static void BM_MessageToJson(benchmark::State& state) {
     agentforge::Message msg(agentforge::Role::assistant, "Hello, world!");
     for (auto _ : state) {
-        agentforge::Json j = msg;
+        agentforge::Json j;
+        to_json(j, msg);
         benchmark::DoNotOptimize(j);
     }
 }
@@ -21,7 +22,8 @@ BENCHMARK(BM_MessageToJson);
 
 static void BM_MessageFromJson(benchmark::State& state) {
     agentforge::Message msg(agentforge::Role::assistant, "Hello, world!");
-    agentforge::Json j = msg;
+    agentforge::Json j;
+    to_json(j, msg);
     for (auto _ : state) {
         auto restored = j.get<agentforge::Message>();
         benchmark::DoNotOptimize(restored);

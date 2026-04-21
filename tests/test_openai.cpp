@@ -224,9 +224,10 @@ TEST_CASE("OpenAI serializes tools in OpenAI wire shape", "[openai]") {
     ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
     OpenAiProvider provider(mock, config);
 
-    Json weather_params = {{"type", "object"},
-                           {"properties", {{"city", {{"type", "string"}}}}},
-                           {"required", Json::array({"city"})}};
+    Json weather_params =
+        Json::object({{"type", "object"},
+                      {"properties", Json::object({{"city", Json::object({{"type", "string"}})}})},
+                      {"required", Json::array({"city"})}});
     std::vector<ToolView> tool_views = {
         ToolView{"get_weather", "Get the weather for a city", weather_params}};
 

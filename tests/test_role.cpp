@@ -11,7 +11,8 @@ TEST_CASE("Role enum values exist", "[role]") {
 
 TEST_CASE("Role JSON round-trip", "[role]") {
     auto test = [](Role role, const std::string& expected) {
-        agentforge::Json j = role;
+        agentforge::Json j;
+        to_json(j, role);
         REQUIRE(j.get<std::string>() == expected);
 
         auto restored = j.get<Role>();

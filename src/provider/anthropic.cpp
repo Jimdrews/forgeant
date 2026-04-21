@@ -7,8 +7,9 @@ namespace agentforge {
 namespace {
 
 Json serialize_tool(const ToolView& tool) {
-    return {
-        {"name", tool.name}, {"description", tool.description}, {"input_schema", tool.parameters}};
+    return Json::object({{"name", tool.name},
+                         {"description", tool.description},
+                         {"input_schema", tool.parameters}});
 }
 
 } // namespace
@@ -41,7 +42,7 @@ Json AnthropicProvider::serialize_request(const Conversation& conversation,
         if (msg.role == Role::tool) {
             msg_json["role"] = "user";
         } else {
-            msg_json["role"] = msg.role;
+            to_json(msg_json["role"], msg.role);
         }
 
         auto& content = msg_json["content"] = Json::array();
@@ -66,8 +67,8 @@ Json AnthropicProvider::serialize_request(const Conversation& conversation,
         if (schema_copy.value("type", "") == "object") {
             schema_copy["additionalProperties"] = false;
         }
-        body["output_config"] = {
-            {"format", {{"type", "json_schema"}, {"schema", std::move(schema_copy)}}}};
+        body["output_config"]["format"]["type"] = "json_schema";
+        body["output_config"]["format"]["schema"] = std::move(schema_copy);
     }
 
     return body;

@@ -202,9 +202,10 @@ TEST_CASE("Anthropic serializes tools in Anthropic wire shape", "[anthropic]") {
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
     AnthropicProvider provider(mock, config);
 
-    Json weather_params = {{"type", "object"},
-                           {"properties", {{"city", {{"type", "string"}}}}},
-                           {"required", Json::array({"city"})}};
+    Json weather_params =
+        Json::object({{"type", "object"},
+                      {"properties", Json::object({{"city", Json::object({{"type", "string"}})}})},
+                      {"required", Json::array({"city"})}});
     std::vector<ToolView> tool_views = {
         ToolView{"get_weather", "Get the weather for a city", weather_params}};
 
@@ -249,7 +250,9 @@ TEST_CASE("Anthropic output_config places schema directly under format", "[anthr
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
     AnthropicProvider provider(mock, config);
 
-    Json schema = {{"type", "object"}, {"properties", {{"name", {{"type", "string"}}}}}};
+    Json schema = Json::object(
+        {{"type", "object"},
+         {"properties", Json::object({{"name", Json::object({{"type", "string"}})}})}});
 
     Conversation conv;
     conv.add(Message(Role::user, "Give me JSON"));
@@ -274,7 +277,7 @@ TEST_CASE("Anthropic leaves non-object schemas unchanged", "[anthropic]") {
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
     AnthropicProvider provider(mock, config);
 
-    Json schema = {{"type", "string"}};
+    Json schema = Json::object({{"type", "string"}});
 
     Conversation conv;
     conv.add(Message(Role::user, "Give me JSON"));
@@ -290,7 +293,9 @@ TEST_CASE("Anthropic does not mutate caller's schema", "[anthropic]") {
     ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
     AnthropicProvider provider(mock, config);
 
-    Json schema = {{"type", "object"}, {"properties", {{"name", {{"type", "string"}}}}}};
+    Json schema = Json::object(
+        {{"type", "object"},
+         {"properties", Json::object({{"name", Json::object({{"type", "string"}})}})}});
     Json schema_before = schema;
 
     Conversation conv;

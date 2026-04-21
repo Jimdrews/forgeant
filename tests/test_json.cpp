@@ -20,29 +20,29 @@ TEST_CASE("json::dump produces valid string", "[json]") {
     REQUIRE(roundtrip == j);
 }
 
-TEST_CASE("json::get extracts string", "[json]") {
+TEST_CASE("Json::get extracts string", "[json]") {
     auto j = json::parse(R"("hello")");
-    REQUIRE(json::get<std::string>(j) == "hello");
+    REQUIRE(j.get<std::string>() == "hello");
 }
 
-TEST_CASE("json::get extracts int", "[json]") {
+TEST_CASE("Json::get extracts int", "[json]") {
     auto j = json::parse("42");
-    REQUIRE(json::get<int>(j) == 42);
+    REQUIRE(j.get<int>() == 42);
 }
 
-TEST_CASE("json::get type mismatch throws", "[json]") {
+TEST_CASE("Json::get type mismatch throws", "[json]") {
     auto j = json::parse(R"("not a number")");
-    REQUIRE_THROWS(json::get<int>(j));
+    REQUIRE_THROWS(j.get<int>());
 }
 
-TEST_CASE("json::from string", "[json]") {
-    auto j = json::from(std::string("hello"));
-    REQUIRE(json::get<std::string>(j) == "hello");
+TEST_CASE("Json construction from string", "[json]") {
+    Json j(std::string("hello"));
+    REQUIRE(j.get<std::string>() == "hello");
 }
 
-TEST_CASE("json::from int", "[json]") {
-    auto j = json::from(42);
-    REQUIRE(json::get<int>(j) == 42);
+TEST_CASE("Json construction from int", "[json]") {
+    Json j(42);
+    REQUIRE(j.get<int>() == 42);
 }
 
 TEST_CASE("json::array returns empty array", "[json]") {
@@ -57,8 +57,8 @@ TEST_CASE("json::object returns empty object", "[json]") {
     REQUIRE(j.empty());
 }
 
-TEST_CASE("Json alias is usable as nlohmann::json", "[json]") {
-    Json j = {{"name", "test"}, {"value", 123}};
+TEST_CASE("Json object construction with initializer list", "[json]") {
+    Json j = Json::object({{"name", "test"}, {"value", 123}});
     REQUIRE(j["name"] == "test");
     REQUIRE(j["value"] == 123);
 }

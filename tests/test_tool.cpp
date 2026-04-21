@@ -40,7 +40,7 @@ TEST_CASE("make_tool execute deserializes and calls handler", "[tool]") {
     auto tool =
         make_tool<AddParams>("add", "Add two numbers", [](AddParams p) { return p.a + p.b; });
 
-    auto result = tool.execute({{"a", 3}, {"b", 4}});
+    auto result = tool.execute(Json::object({{"a", 3}, {"b", 4}}));
     REQUIRE(result == 7);
 }
 
@@ -48,7 +48,7 @@ TEST_CASE("make_tool execute with string return", "[tool]") {
     auto tool = make_tool<AddParams>("add_str", "Add as string",
                                      [](AddParams p) { return std::to_string(p.a + p.b); });
 
-    auto result = tool.execute({{"a", 3}, {"b", 4}});
+    auto result = tool.execute(Json::object({{"a", 3}, {"b", 4}}));
     REQUIRE(result == "7");
 }
 
@@ -59,12 +59,12 @@ TEST_CASE("Raw tool creation", "[tool]") {
               [](const Json& args) -> Json { return args["x"].get<int>() * 2; });
 
     REQUIRE(tool.name == "double_it");
-    auto result = tool.execute({{"x", 5}});
+    auto result = tool.execute(Json::object({{"x", 5}}));
     REQUIRE(result == 10);
 }
 
 TEST_CASE("Tool execute throws on invalid args", "[tool]") {
     auto tool = make_tool<AddParams>("add", "Add", [](AddParams p) { return p.a + p.b; });
 
-    REQUIRE_THROWS(tool.execute({{"invalid", "args"}}));
+    REQUIRE_THROWS(tool.execute(Json::object({{"invalid", "args"}})));
 }

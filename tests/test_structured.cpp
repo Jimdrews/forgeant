@@ -34,10 +34,11 @@ namespace {
 
 testing::MockHttpClient make_anthropic_mock(const std::string& json_content, int status = 200) {
     testing::MockHttpClient mock;
-    Json response_body = {{"content", {{{"type", "text"}, {"text", json_content}}}},
-                          {"model", "claude-sonnet-4-20250514"},
-                          {"stop_reason", "end_turn"},
-                          {"usage", {{"input_tokens", 10}, {"output_tokens", 5}}}};
+    Json response_body = Json::object(
+        {{"content", Json::array({Json::object({{"type", "text"}, {"text", json_content}})})},
+         {"model", "claude-sonnet-4-20250514"},
+         {"stop_reason", "end_turn"},
+         {"usage", Json::object({{"input_tokens", 10}, {"output_tokens", 5}})}});
     mock.canned_response.status_code = status;
     mock.canned_response.body = response_body.dump();
     return mock;
@@ -45,11 +46,13 @@ testing::MockHttpClient make_anthropic_mock(const std::string& json_content, int
 
 testing::MockHttpClient make_openai_mock(const std::string& json_content, int status = 200) {
     testing::MockHttpClient mock;
-    Json response_body = {{"choices",
-                           {{{"message", {{"role", "assistant"}, {"content", json_content}}},
-                             {"finish_reason", "stop"}}}},
-                          {"model", "gpt-4o"},
-                          {"usage", {{"prompt_tokens", 10}, {"completion_tokens", 5}}}};
+    Json response_body = Json::object(
+        {{"choices",
+          Json::array({Json::object(
+              {{"message", Json::object({{"role", "assistant"}, {"content", json_content}})},
+               {"finish_reason", "stop"}})})},
+         {"model", "gpt-4o"},
+         {"usage", Json::object({{"prompt_tokens", 10}, {"completion_tokens", 5}})}});
     mock.canned_response.status_code = status;
     mock.canned_response.body = response_body.dump();
     return mock;
@@ -99,15 +102,17 @@ TEST_CASE("structured<T> retries on parse failure", "[structured]") {
     testing::MockHttpClient mock;
     int call_count = 0;
 
-    Json bad_response = {{"content", {{{"type", "text"}, {"text", "not json"}}}},
-                         {"model", "claude-sonnet-4-20250514"},
-                         {"stop_reason", "end_turn"},
-                         {"usage", {{"input_tokens", 10}, {"output_tokens", 5}}}};
-    Json good_response = {
-        {"content", {{{"type", "text"}, {"text", R"({"name": "Fixed", "age": 1})"}}}},
-        {"model", "claude-sonnet-4-20250514"},
-        {"stop_reason", "end_turn"},
-        {"usage", {{"input_tokens", 10}, {"output_tokens", 5}}}};
+    Json bad_response = Json::object(
+        {{"content", Json::array({Json::object({{"type", "text"}, {"text", "not json"}})})},
+         {"model", "claude-sonnet-4-20250514"},
+         {"stop_reason", "end_turn"},
+         {"usage", Json::object({{"input_tokens", 10}, {"output_tokens", 5}})}});
+    Json good_response = Json::object(
+        {{"content", Json::array({Json::object(
+                         {{"type", "text"}, {"text", R"({"name": "Fixed", "age": 1})"}})})},
+         {"model", "claude-sonnet-4-20250514"},
+         {"stop_reason", "end_turn"},
+         {"usage", Json::object({{"input_tokens", 10}, {"output_tokens", 5}})}});
 
     mock.canned_response.status_code = 200;
     mock.canned_response.body = bad_response.dump();
@@ -171,11 +176,13 @@ TEST_CASE("structured<T> throws immediately with max_retries=0", "[structured]")
 
 TEST_CASE("structured<T> throws when response has no TextBlock", "[structured]") {
     testing::MockHttpClient mock;
-    Json response_body = {
-        {"content", {{{"type", "tool_use"}, {"id", "1"}, {"name", "x"}, {"input", {}}}}},
-        {"model", "claude-sonnet-4-20250514"},
-        {"stop_reason", "tool_use"},
-        {"usage", {{"input_tokens", 10}, {"output_tokens", 5}}}};
+    Json response_body = Json::object(
+        {{"content",
+          Json::array({Json::object(
+              {{"type", "tool_use"}, {"id", "1"}, {"name", "x"}, {"input", Json::object()}})})},
+         {"model", "claude-sonnet-4-20250514"},
+         {"stop_reason", "tool_use"},
+         {"usage", Json::object({{"input_tokens", 10}, {"output_tokens", 5}})}});
     mock.canned_response.status_code = 200;
     mock.canned_response.body = response_body.dump();
 
@@ -259,7 +266,7 @@ TEST_CASE("Provider accepts tools and schema together via ChatRequest", "[struct
     Conversation conv;
     conv.add(Message(Role::user, "Test"));
 
-    Json noop_params = {{"type", "object"}};
+    Json noop_params = Json::object({{"type", "object"}});
     std::vector<ToolView> tool_views = {ToolView{"noop", "do nothing", noop_params}};
 
     provider.chat(

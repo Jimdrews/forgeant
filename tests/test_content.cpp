@@ -15,7 +15,8 @@ TEST_CASE("TextBlock creation and equality", "[content]") {
 
 TEST_CASE("TextBlock JSON round-trip", "[content]") {
     TextBlock original{.text = "hello world"};
-    Json j = original;
+    Json j;
+    to_json(j, original);
 
     REQUIRE(j["type"] == "text");
     REQUIRE(j["text"] == "hello world");
@@ -25,8 +26,9 @@ TEST_CASE("TextBlock JSON round-trip", "[content]") {
 }
 
 TEST_CASE("ToolUseBlock JSON round-trip", "[content]") {
-    ToolUseBlock original("call_123", "get_weather", {{"city", "Denver"}});
-    Json j = original;
+    ToolUseBlock original("call_123", "get_weather", Json::object({{"city", "Denver"}}));
+    Json j;
+    to_json(j, original);
 
     REQUIRE(j["type"] == "tool_use");
     REQUIRE(j["id"] == "call_123");
@@ -44,7 +46,8 @@ TEST_CASE("ToolResultBlock defaults is_error to false", "[content]") {
 TEST_CASE("ToolResultBlock JSON round-trip", "[content]") {
     ToolResultBlock original{
         .tool_use_id = "call_123", .content = "error: not found", .is_error = true};
-    Json j = original;
+    Json j;
+    to_json(j, original);
 
     REQUIRE(j["type"] == "tool_result");
     REQUIRE(j["is_error"] == true);
@@ -64,8 +67,9 @@ TEST_CASE("ContentBlock variant holds correct alternative", "[content]") {
 }
 
 TEST_CASE("ContentBlock JSON round-trip preserves variant type", "[content]") {
-    ContentBlock original = ToolUseBlock("1", "test", {{"a", 1}});
-    Json j = original;
+    ContentBlock original = ToolUseBlock("1", "test", Json::object({{"a", 1}}));
+    Json j;
+    to_json(j, original);
 
     REQUIRE(j["type"] == "tool_use");
 

@@ -10,7 +10,7 @@ ToolUseBlock::ToolUseBlock(std::string id, std::string name, Json input)
     : id(std::move(id)), name(std::move(name)), input(std::move(input)) {}
 
 void to_json(Json& j, const TextBlock& block) {
-    j = {{"type", "text"}, {"text", block.text}};
+    j = Json::object({{"type", "text"}, {"text", block.text}});
 }
 
 void from_json(const Json& j, TextBlock& block) {
@@ -18,7 +18,8 @@ void from_json(const Json& j, TextBlock& block) {
 }
 
 void to_json(Json& j, const ToolUseBlock& block) {
-    j = {{"type", "tool_use"}, {"id", block.id}, {"name", block.name}, {"input", block.input}};
+    j = Json::object(
+        {{"type", "tool_use"}, {"id", block.id}, {"name", block.name}, {"input", block.input}});
 }
 
 void from_json(const Json& j, ToolUseBlock& block) {
@@ -28,10 +29,10 @@ void from_json(const Json& j, ToolUseBlock& block) {
 }
 
 void to_json(Json& j, const ToolResultBlock& block) {
-    j = {{"type", "tool_result"},
-         {"tool_use_id", block.tool_use_id},
-         {"content", block.content},
-         {"is_error", block.is_error}};
+    j = Json::object({{"type", "tool_result"},
+                      {"tool_use_id", block.tool_use_id},
+                      {"content", block.content},
+                      {"is_error", block.is_error}});
 }
 
 void from_json(const Json& j, ToolResultBlock& block) {

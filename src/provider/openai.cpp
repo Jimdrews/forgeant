@@ -20,16 +20,15 @@ void serialize_tool_result_messages(Json& messages, const Message& msg) {
 }
 
 Json serialize_tool(const ToolView& tool) {
-    return {{"type", "function"},
-            {"function",
-             {{"name", tool.name},
-              {"description", tool.description},
-              {"parameters", tool.parameters}}}};
+    return Json::object({{"type", "function"},
+                         {"function", Json::object({{"name", tool.name},
+                                                    {"description", tool.description},
+                                                    {"parameters", tool.parameters}})}});
 }
 
 Json serialize_message(const Message& msg) {
     Json msg_json;
-    msg_json["role"] = msg.role;
+    to_json(msg_json["role"], msg.role);
 
     std::string text_content;
     Json tool_calls = Json::array();
@@ -39,10 +38,11 @@ Json serialize_message(const Message& msg) {
             text_content = std::get<TextBlock>(block).text;
         } else if (std::holds_alternative<ToolUseBlock>(block)) {
             const auto& tool = std::get<ToolUseBlock>(block);
-            tool_calls.push_back(
+            tool_calls.push_back(Json::object(
                 {{"id", tool.id},
                  {"type", "function"},
-                 {"function", {{"name", tool.name}, {"arguments", tool.input.dump()}}}});
+                 {"function",
+                  Json::object({{"name", tool.name}, {"arguments", tool.input.dump()}})}}));
         }
     }
 
@@ -81,7 +81,7 @@ Json OpenAiProvider::serialize_request(const Conversation& conversation,
     auto& messages = body["messages"] = Json::array();
 
     if (const auto& sp = conversation.system_prompt()) {
-        messages.push_back({{"role", "system"}, {"content", *sp}});
+        messages.push_back(Json::object({{"role", "system"}, {"content", *sp}}));
     }
 
     for (const auto& msg : conversation.messages()) {
@@ -104,10 +104,10 @@ Json OpenAiProvider::serialize_request(const Conversation& conversation,
         if (schema_copy.value("type", "") == "object") {
             schema_copy["additionalProperties"] = false;
         }
-        body["response_format"] = {
-            {"type", "json_schema"},
-            {"json_schema",
-             {{"name", "response"}, {"strict", true}, {"schema", std::move(schema_copy)}}}};
+        body["response_format"] =
+            Json::object({{"type", "json_schema"},
+                          {"json_schema", Json::object({{"name", "response"}, {"strict", true}})}});
+        body["response_format"]["json_schema"]["schema"] = std::move(schema_copy);
     }
 
     return body;
@@ -141,7 +141,7 @@ LlmResponse OpenAiProvider::deserialize_response(const Json& json) {
                 try {
                     args = Json::parse(func["arguments"].get<std::string>());
                 } catch (...) {
-                    args = {{"_raw", func["arguments"].get<std::string>()}};
+                    args = Json::object({{"_raw", func["arguments"].get<std::string>()}});
                 }
             }
             content_blocks.emplace_back(

@@ -6,7 +6,7 @@ project(agentforge
     DESCRIPTION "C++ Agentic AI Framework"
 )
 
-find_package(nlohmann_json REQUIRED)
+find_package(glaze REQUIRED)
 find_package(CURL REQUIRED)
 
 add_library(agentforge
@@ -27,7 +27,7 @@ add_library(agentforge
 )
 add_library(agentforge::agentforge ALIAS agentforge)
 
-target_compile_features(agentforge PUBLIC cxx_std_20)
+target_compile_features(agentforge PUBLIC cxx_std_23)
 
 target_include_directories(agentforge
     PUBLIC
@@ -36,9 +36,8 @@ target_include_directories(agentforge
 )
 
 target_link_libraries(agentforge
-    PUBLIC
-        nlohmann_json::nlohmann_json
     PRIVATE
+        glaze::glaze
         CURL::libcurl
 )
 

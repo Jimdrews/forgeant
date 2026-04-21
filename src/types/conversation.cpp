@@ -3,12 +3,14 @@
 namespace agentforge {
 
 void to_json(Json& j, const Conversation& conv) {
-    j = {{"messages", Json::array()}};
+    j = Json::object({{"messages", Json::array()}});
     if (const auto& sp = conv.system_prompt()) {
         j["system_prompt"] = *sp;
     }
     for (const auto& msg : conv.messages()) {
-        j["messages"].push_back(msg);
+        Json msg_json;
+        to_json(msg_json, msg);
+        j["messages"].push_back(std::move(msg_json));
     }
 }
 

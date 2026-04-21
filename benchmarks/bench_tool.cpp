@@ -26,7 +26,7 @@ static void BM_ToolDispatch(benchmark::State& state) {
     agentforge::ToolRegistry registry;
     registry.add(
         agentforge::make_tool<BenchParams>("echo", "Echo", [](BenchParams p) { return p.text; }));
-    agentforge::Json args = {{"text", "hello"}, {"count", 1}};
+    agentforge::Json args = agentforge::Json::object({{"text", "hello"}, {"count", 1}});
 
     for (auto _ : state) {
         auto result = registry.execute("echo", args);

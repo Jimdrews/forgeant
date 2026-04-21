@@ -40,7 +40,7 @@ TEST_CASE("ToolRegistry execute dispatches by name", "[registry]") {
     ToolRegistry registry;
     registry.add(make_tool<EchoParams>("echo", "Echo text", [](EchoParams p) { return p.text; }));
 
-    auto result = registry.execute("echo", {{"text", "hello"}});
+    auto result = registry.execute("echo", Json::object({{"text", "hello"}}));
     REQUIRE(result == "hello");
 }
 
@@ -78,8 +78,8 @@ TEST_CASE("ToolRegistry multi-tool dispatch", "[registry]") {
                           return text;
                       }));
 
-    auto r1 = registry.execute("echo", {{"text", "hello"}});
-    auto r2 = registry.execute("upper", {{"text", "hello"}});
+    auto r1 = registry.execute("echo", Json::object({{"text", "hello"}}));
+    auto r2 = registry.execute("upper", Json::object({{"text", "hello"}}));
     REQUIRE(r1 == "hello");
     REQUIRE(r2 == "HELLO");
 }

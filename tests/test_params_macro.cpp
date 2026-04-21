@@ -35,7 +35,7 @@ TEST_CASE("ParamSchema specialization generates correct schema", "[params]") {
 }
 
 TEST_CASE("ParamSchema with from_json enables deserialization", "[params]") {
-    agentforge::Json j = {{"city", "Denver"}, {"unit", "fahrenheit"}};
+    agentforge::Json j = agentforge::Json::object({{"city", "Denver"}, {"unit", "fahrenheit"}});
     auto params = j.get<WeatherParams>();
     REQUIRE(params.city == "Denver");
     REQUIRE(params.unit == "fahrenheit");
@@ -45,6 +45,7 @@ TEST_CASE("ParamSchema works with make_tool", "[params]") {
     auto tool = agentforge::make_tool<WeatherParams>(
         "weather", "Get weather", [](WeatherParams p) { return p.city + ": 72F " + p.unit; });
 
-    auto result = tool.execute({{"city", "Denver"}, {"unit", "fahrenheit"}});
+    auto result =
+        tool.execute(agentforge::Json::object({{"city", "Denver"}, {"unit", "fahrenheit"}}));
     REQUIRE(result == "Denver: 72F fahrenheit");
 }

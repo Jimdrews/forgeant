@@ -66,9 +66,10 @@ LlmResponse tool_call_response(const std::string& tool_id, const std::string& to
 
 LlmResponse multi_tool_response(int input_tok = 10, int output_tok = 5) {
     LlmResponse r;
-    r.message = Message(Role::assistant,
-                        std::vector<ContentBlock>{ToolUseBlock("1", "add", {{"a", 1}, {"b", 2}}),
-                                                  ToolUseBlock("2", "add", {{"a", 3}, {"b", 4}})});
+    r.message = Message(
+        Role::assistant,
+        std::vector<ContentBlock>{ToolUseBlock("1", "add", Json::object({{"a", 1}, {"b", 2}})),
+                                  ToolUseBlock("2", "add", Json::object({{"a", 3}, {"b", 4}}))});
     r.finish_reason = "tool_use";
     r.usage = {.input_tokens = input_tok, .output_tokens = output_tok};
     r.model = "mock";
@@ -91,7 +92,8 @@ TEST_CASE("Agent simple text response", "[agent]") {
 
 TEST_CASE("Agent tool call cycle", "[agent]") {
     MockProvider provider;
-    provider.responses.push(tool_call_response("call_1", "add", {{"a", 2}, {"b", 3}}));
+    provider.responses.push(
+        tool_call_response("call_1", "add", Json::object({{"a", 2}, {"b", 3}})));
     provider.responses.push(text_response("The answer is 5."));
 
     Agent agent(provider);
@@ -119,7 +121,8 @@ TEST_CASE("Agent multiple tool calls in one response", "[agent]") {
 
 TEST_CASE("Agent tool error wrapping", "[agent]") {
     MockProvider provider;
-    provider.responses.push(tool_call_response("call_1", "fail", {{"a", 1}, {"b", 2}}));
+    provider.responses.push(
+        tool_call_response("call_1", "fail", Json::object({{"a", 1}, {"b", 2}})));
     provider.responses.push(text_response("Sorry, that failed."));
 
     Agent agent(provider);
@@ -134,8 +137,8 @@ TEST_CASE("Agent tool error wrapping", "[agent]") {
 TEST_CASE("Agent max iterations throws", "[agent]") {
     MockProvider provider;
     for (int i = 0; i < 3; ++i) {
-        provider.responses.push(
-            tool_call_response("call_" + std::to_string(i), "add", {{"a", 1}, {"b", 1}}));
+        provider.responses.push(tool_call_response("call_" + std::to_string(i), "add",
+                                                   Json::object({{"a", 1}, {"b", 1}})));
     }
 
     Agent agent(provider, AgentOptions{.max_iterations = 3});
@@ -193,7 +196,8 @@ TEST_CASE("Agent does not mutate caller Conversation", "[agent]") {
 
 TEST_CASE("Agent cumulative usage tracking", "[agent]") {
     MockProvider provider;
-    provider.responses.push(tool_call_response("1", "add", {{"a", 1}, {"b", 2}}, 100, 50));
+    provider.responses.push(
+        tool_call_response("1", "add", Json::object({{"a", 1}, {"b", 2}}), 100, 50));
     provider.responses.push(text_response("Done.", 80, 30));
 
     Agent agent(provider);
@@ -230,7 +234,7 @@ TEST_CASE("Agent error preserves iteration count and usage", "[agent]") {
         int call_count = 0;
         LlmResponse chat(const Conversation&, const ChatRequest&) override {
             if (call_count++ == 0) {
-                return tool_call_response("1", "add", {{"a", 1}, {"b", 2}}, 100, 50);
+                return tool_call_response("1", "add", Json::object({{"a", 1}, {"b", 2}}), 100, 50);
             }
             throw std::runtime_error("timeout on second call");
         }
@@ -267,7 +271,7 @@ TEST_CASE("Agent RunOverrides::max_iterations applies for current call only", "[
     MockProvider provider;
     for (int i = 0; i < 5; ++i) {
         provider.responses.push(
-            tool_call_response("c" + std::to_string(i), "add", {{"a", 1}, {"b", 1}}));
+            tool_call_response("c" + std::to_string(i), "add", Json::object({{"a", 1}, {"b", 1}})));
     }
 
     Agent agent(provider, AgentOptions{.max_iterations = 10});
@@ -301,7 +305,7 @@ TEST_CASE("Agent factory invalid provider still throws", "[agent]") {
 
 TEST_CASE("Agent::run<T> composes tool loop with structured output", "[agent]") {
     MockProvider provider;
-    provider.responses.push(tool_call_response("c1", "add", {{"a", 2}, {"b", 3}}));
+    provider.responses.push(tool_call_response("c1", "add", Json::object({{"a", 2}, {"b", 3}})));
 
     LlmResponse final;
     final.message = Message(Role::assistant, R"({"a": 2, "b": 3})");
