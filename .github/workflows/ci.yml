@@ -12,16 +12,16 @@ env:
 
 jobs:
   gcc:
-    name: GCC 13 (Ubuntu)
+    name: GCC 14 (Ubuntu)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install GCC 13
+      - name: Install GCC 14
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-13 g++-13
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100
+          sudo apt-get install -y gcc-14 g++-13
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 100
 
       - name: Setup vcpkg
@@ -32,7 +32,7 @@ jobs:
       - name: Configure
         run: cmake --preset ci
         env:
-          CC: gcc-13
+          CC: gcc-14
           CXX: g++-13
 
       - name: Build
@@ -121,15 +121,15 @@ jobs:
         run: ctest --preset asan
 
   valgrind:
-    name: Valgrind Memcheck (GCC 13)
+    name: Valgrind Memcheck (GCC 14)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install GCC 13 and Valgrind
+      - name: Install GCC 14 and Valgrind
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-13 g++-13 valgrind
+          sudo apt-get install -y gcc-14 g++-13 valgrind
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -139,7 +139,7 @@ jobs:
       - name: Configure
         run: cmake --preset valgrind
         env:
-          CC: gcc-13
+          CC: gcc-14
           CXX: g++-13
 
       - name: Build
