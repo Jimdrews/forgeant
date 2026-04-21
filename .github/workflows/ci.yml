@@ -20,20 +20,20 @@ jobs:
       - name: Install GCC 14
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-14 g++-13
+          sudo apt-get install -y gcc-14 g++-14
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "01f602195983451bc83e72f4214af2cbc495aa94"
+          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
 
       - name: Configure
         run: cmake --preset ci
         env:
           CC: gcc-14
-          CXX: g++-13
+          CXX: g++-14
 
       - name: Build
         run: cmake --build --preset ci
@@ -58,7 +58,7 @@ jobs:
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "01f602195983451bc83e72f4214af2cbc495aa94"
+          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
 
       - name: Configure
         run: cmake --preset ci
@@ -81,7 +81,7 @@ jobs:
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "01f602195983451bc83e72f4214af2cbc495aa94"
+          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
 
       - name: Configure
         run: cmake --preset ci
@@ -106,7 +106,7 @@ jobs:
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "01f602195983451bc83e72f4214af2cbc495aa94"
+          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
 
       - name: Configure
         run: cmake --preset asan
@@ -129,18 +129,18 @@ jobs:
       - name: Install GCC 14 and Valgrind
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-14 g++-13 valgrind
+          sudo apt-get install -y gcc-14 g++-14 valgrind
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "01f602195983451bc83e72f4214af2cbc495aa94"
+          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
 
       - name: Configure
         run: cmake --preset valgrind
         env:
           CC: gcc-14
-          CXX: g++-13
+          CXX: g++-14
 
       - name: Build
         run: cmake --build --preset valgrind
@@ -162,7 +162,7 @@ jobs:
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "01f602195983451bc83e72f4214af2cbc495aa94"
+          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
 
       - name: Configure
         run: cmake --preset dev
