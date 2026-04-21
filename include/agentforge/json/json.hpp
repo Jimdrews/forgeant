@@ -17,13 +17,10 @@ namespace agentforge {
 namespace detail {
 
 template <typename T>
-struct is_vector : std::false_type {};
+struct IsVector : std::false_type {};
 
 template <typename T, typename A>
-struct is_vector<std::vector<T, A>> : std::true_type {};
-
-template <typename T>
-inline constexpr bool is_vector_v = is_vector<T>::value;
+struct IsVector<std::vector<T, A>> : std::true_type {};
 
 } // namespace detail
 
@@ -64,17 +61,17 @@ class Json {
     Json& operator=(Json&&) noexcept = default;
     ~Json() = default;
 
-    bool is_null() const { return std::holds_alternative<null_t>(value_); }
-    bool is_boolean() const { return std::holds_alternative<boolean_t>(value_); }
+    [[nodiscard]] bool is_null() const { return std::holds_alternative<null_t>(value_); }
+    [[nodiscard]] bool is_boolean() const { return std::holds_alternative<boolean_t>(value_); }
 
-    bool is_number() const {
+    [[nodiscard]] bool is_number() const {
         return std::holds_alternative<integer_t>(value_) ||
                std::holds_alternative<number_t>(value_);
     }
 
-    bool is_string() const { return std::holds_alternative<string_t>(value_); }
-    bool is_array() const { return std::holds_alternative<array_t>(value_); }
-    bool is_object() const { return std::holds_alternative<object_t>(value_); }
+    [[nodiscard]] bool is_string() const { return std::holds_alternative<string_t>(value_); }
+    [[nodiscard]] bool is_array() const { return std::holds_alternative<array_t>(value_); }
+    [[nodiscard]] bool is_object() const { return std::holds_alternative<object_t>(value_); }
 
     Json& operator[](const std::string& key) {
         if (is_null()) {
@@ -103,7 +100,7 @@ class Json {
         return it->second;
     }
 
-    const Json& at(const std::string& key) const {
+    [[nodiscard]] const Json& at(const std::string& key) const {
         if (!is_object()) {
             throw std::out_of_range("Json::at: not an object");
         }
@@ -116,7 +113,7 @@ class Json {
     }
 
     template <typename T>
-    T value(const std::string& key, const T& default_value) const {
+    [[nodiscard]] T value(const std::string& key, const T& default_value) const {
         if (!is_object()) {
             return default_value;
         }
@@ -128,15 +125,15 @@ class Json {
         return it->second.get<T>();
     }
 
-    std::string value(const std::string& key, const char* default_value) const {
+    [[nodiscard]] std::string value(const std::string& key, const char* default_value) const {
         return value<std::string>(key, std::string(default_value));
     }
 
-    bool contains(const std::string& key) const {
+    [[nodiscard]] bool contains(const std::string& key) const {
         if (!is_object()) {
             return false;
         }
-        return std::get<object_t>(value_).count(key) > 0;
+        return std::get<object_t>(value_).contains(key);
     }
 
     void push_back(Json val) {
@@ -146,7 +143,7 @@ class Json {
         std::get<array_t>(value_).push_back(std::move(val));
     }
 
-    bool empty() const {
+    [[nodiscard]] bool empty() const {
         if (is_array()) {
             return std::get<array_t>(value_).empty();
         }
@@ -159,7 +156,7 @@ class Json {
         return false;
     }
 
-    std::size_t size() const {
+    [[nodiscard]] std::size_t size() const {
         if (is_array()) {
             return std::get<array_t>(value_).size();
         }
@@ -172,13 +169,13 @@ class Json {
     using iterator = array_t::iterator;
     using const_iterator = array_t::const_iterator;
 
-    iterator begin() { return std::get<array_t>(value_).begin(); }
-    iterator end() { return std::get<array_t>(value_).end(); }
-    const_iterator begin() const { return std::get<array_t>(value_).begin(); }
-    const_iterator end() const { return std::get<array_t>(value_).end(); }
+    [[nodiscard]] iterator begin() { return std::get<array_t>(value_).begin(); }
+    [[nodiscard]] iterator end() { return std::get<array_t>(value_).end(); }
+    [[nodiscard]] const_iterator begin() const { return std::get<array_t>(value_).begin(); }
+    [[nodiscard]] const_iterator end() const { return std::get<array_t>(value_).end(); }
 
     template <typename T>
-    T get() const {
+    [[nodiscard]] T get() const {
         using U = std::remove_cvref_t<T>;
         if constexpr (std::is_same_v<U, Json>) {
             return *this;
@@ -195,7 +192,7 @@ class Json {
                 return static_cast<U>(std::get<integer_t>(value_));
             }
             return static_cast<U>(std::get<number_t>(value_));
-        } else if constexpr (detail::is_vector_v<U>) {
+        } else if constexpr (detail::IsVector<U>::value) {
             using elem_t = typename U::value_type;
             const auto& arr = std::get<array_t>(value_);
             U result;
@@ -216,9 +213,9 @@ class Json {
         val = get<T>();
     }
 
-    bool operator==(const Json& other) const { return value_ == other.value_; }
+    [[nodiscard]] bool operator==(const Json& other) const { return value_ == other.value_; }
 
-    std::string dump() const;
+    [[nodiscard]] std::string dump() const;
     static Json parse(std::string_view input);
 
     static Json array() { return Json(array_t{}); }
