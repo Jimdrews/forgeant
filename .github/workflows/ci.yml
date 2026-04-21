@@ -45,15 +45,15 @@ jobs:
         run: cmake --build --preset ci --target agentforge_benchmarks
 
   clang:
-    name: Clang 18 (Ubuntu)
+    name: Clang 19 (Ubuntu)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install Clang 18
+      - name: Install Clang 19
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-18
+          sudo apt-get install -y clang-19
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -63,8 +63,8 @@ jobs:
       - name: Configure
         run: cmake --preset ci
         env:
-          CC: clang-18
-          CXX: clang++-18
+          CC: clang-19
+          CXX: clang++-19
 
       - name: Build
         run: cmake --build --preset ci
@@ -93,15 +93,15 @@ jobs:
         run: ctest --preset ci
 
   sanitizers:
-    name: ASan + UBSan (Clang 18)
+    name: ASan + UBSan (Clang 19)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install Clang 18
+      - name: Install Clang 19
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-18
+          sudo apt-get install -y clang-19
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -111,8 +111,8 @@ jobs:
       - name: Configure
         run: cmake --preset asan
         env:
-          CC: clang-18
-          CXX: clang++-18
+          CC: clang-19
+          CXX: clang++-19
 
       - name: Build
         run: cmake --build --preset asan
@@ -154,10 +154,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install Clang 18 tools
+      - name: Install Clang 19 tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-18 clang-tidy-18
+          sudo apt-get install -y clang-19 clang-tidy-19
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -167,13 +167,13 @@ jobs:
       - name: Configure
         run: cmake --preset dev
         env:
-          CC: clang-18
-          CXX: clang++-18
+          CC: clang-19
+          CXX: clang++-19
 
       - name: Run clang-tidy
         run: |
           find include src -name '*.hpp' -o -name '*.cpp' | \
-            xargs clang-tidy-18 -p build/dev --warnings-as-errors='*'
+            xargs clang-tidy-19 -p build/dev --warnings-as-errors='*'
 
   format-check:
     name: Format Check
@@ -184,9 +184,9 @@ jobs:
       - name: Install clang-format
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format-18
+          sudo apt-get install -y clang-format-19
 
       - name: Check formatting
         run: |
           find include src tests -name '*.hpp' -o -name '*.cpp' | \
-            xargs clang-format-18 --dry-run --Werror
+            xargs clang-format-19 --dry-run --Werror
