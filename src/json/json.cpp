@@ -20,7 +20,8 @@ Json from_generic(const glz::generic& g) {
             if constexpr (std::is_same_v<T, std::nullptr_t>) {
                 return {nullptr};
             } else if constexpr (std::is_same_v<T, bool>) {
-                return Json{val};
+                bool b = val;
+                return {b};
             } else if constexpr (std::is_same_v<T, double>) {
                 if (val == std::floor(val) && std::isfinite(val) &&
                     val >= static_cast<double>(std::numeric_limits<Json::integer_t>::min()) &&
