@@ -36,7 +36,9 @@ jobs:
         run: sed -i "s|@PROJECT_NUMBER@|${GITHUB_REF_NAME}|g" docs/Doxyfile
 
       - name: Build Doxygen site
-        run: doxygen docs/Doxyfile
+        run: |
+          mkdir -p build/docs
+          doxygen docs/Doxyfile
 
       - name: Verify output
         run: test -f build/docs/html/index.html
