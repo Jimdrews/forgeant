@@ -36,3 +36,7 @@ Thumbs.db
 
 # Pre-commit
 .pre-commit-config.yaml.bak
+
+# Doxygen output and fetched theme
+build/docs/
+docs/doxygen-awesome-css/

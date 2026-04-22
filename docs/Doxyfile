@@ -1,0 +1,45 @@
+# Doxygen configuration for forgeant.
+#
+# Only values that differ from Doxygen defaults are set here. A full
+# generated Doxyfile would be >2800 lines of commented defaults; this
+# minimal form is easier to audit and maintain.
+#
+# PROJECT_NUMBER uses a @...@ placeholder that CI substitutes with the
+# pushed tag before invoking Doxygen.
+
+PROJECT_NAME           = forgeant
+PROJECT_BRIEF          = "Build LLM-powered agents in C++"
+PROJECT_LOGO           = docs/logo-light.svg
+PROJECT_NUMBER         = @PROJECT_NUMBER@
+
+INPUT                  = include/forgeant docs/mainpage.md
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hpp
+USE_MDFILE_AS_MAINPAGE = docs/mainpage.md
+
+EXAMPLE_PATH           = examples
+EXAMPLE_RECURSIVE      = YES
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = NO
+
+WARN_AS_ERROR          = NO
+QUIET                  = YES
+
+OUTPUT_DIRECTORY       = build/docs
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+HTML_COLORSTYLE        = LIGHT
+
+HTML_EXTRA_STYLESHEET  = docs/doxygen-awesome-css/doxygen-awesome.css \
+                         docs/doxygen-awesome-css/doxygen-awesome-sidebar-only.css
+
+HTML_EXTRA_FILES       = docs/doxygen-awesome-css/doxygen-awesome-darkmode-toggle.js \
+                         docs/doxygen-awesome-css/doxygen-awesome-fragment-copy-button.js \
+                         docs/doxygen-awesome-css/doxygen-awesome-paragraph-link.js \
+                         docs/doxygen-awesome-css/doxygen-awesome-interactive-toc.js

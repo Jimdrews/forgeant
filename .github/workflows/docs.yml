@@ -1,0 +1,59 @@
+name: Docs
+
+on:
+  push:
+    tags: ["*"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Doxygen and Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Fetch doxygen-awesome-css
+        env:
+          THEME_VERSION: v2.3.4
+        run: |
+          curl -fsSL "https://github.com/jothepro/doxygen-awesome-css/archive/refs/tags/${THEME_VERSION}.tar.gz" \
+            | tar -xz
+          mv "doxygen-awesome-css-${THEME_VERSION#v}" docs/doxygen-awesome-css
+
+      - name: Substitute tag into Doxyfile
+        run: sed -i "s|@PROJECT_NUMBER@|${GITHUB_REF_NAME}|g" docs/Doxyfile
+
+      - name: Build Doxygen site
+        run: doxygen docs/Doxyfile
+
+      - name: Verify output
+        run: test -f build/docs/html/index.html
+
+      - name: Write CNAME
+        run: echo "forgeant.dev" > build/docs/html/CNAME
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/docs/html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

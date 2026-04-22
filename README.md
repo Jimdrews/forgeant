@@ -20,6 +20,8 @@
 
 Forgeant is a C++23 agent framework that gives you tool use, structured output, and a ReAct agent loop across multiple LLM providers -- without leaving C++.
 
+Full API reference at **[forgeant.dev](https://forgeant.dev)**.
+
 ```cpp
 #include <forgeant/forgeant.hpp>
 
