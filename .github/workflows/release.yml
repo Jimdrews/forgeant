@@ -35,7 +35,40 @@ jobs:
             echo "::warning::Tag version ($TAG_VERSION) does not match vcpkg.json ($VCPKG_VERSION)"
           fi
 
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --sort=-v:refname | sed -n '2p')
+          if [ -z "$PREV_TAG" ]; then
+            RANGE="$GITHUB_REF_NAME"
+          else
+            RANGE="${PREV_TAG}..${GITHUB_REF_NAME}"
+          fi
+
+          NOTES=""
+          for prefix in "feat:Features" "fix:Bug Fixes" "refactor:Refactoring" "perf:Performance" "ci:CI" "docs:Documentation" "test:Tests"; do
+            TYPE="${prefix%%:*}"
+            HEADER="${prefix##*:}"
+            COMMITS=$(git log "$RANGE" --pretty=format:"- %s" --grep="^${TYPE}[(!:]" 2>/dev/null | sed "s/^- ${TYPE}[^:]*: /- /")
+            if [ -n "$COMMITS" ]; then
+              NOTES="${NOTES}## ${HEADER}\n\n${COMMITS}\n\n"
+            fi
+          done
+
+          # Catch anything that doesn't match a conventional prefix
+          OTHER=$(git log "$RANGE" --pretty=format:"%s" | grep -v -E "^(feat|fix|refactor|perf|ci|docs|test)[(!:]" | sed 's/^/- /')
+          if [ -n "$OTHER" ]; then
+            NOTES="${NOTES}## Other\n\n${OTHER}\n\n"
+          fi
+
+          NOTES="${NOTES}**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG:-$(git rev-list --max-parents=0 HEAD | head -1)}...${GITHUB_REF_NAME}"
+
+          echo "notes<<CHANGELOG_EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$NOTES" >> "$GITHUB_OUTPUT"
+          echo "CHANGELOG_EOF" >> "$GITHUB_OUTPUT"
+
       - name: Create release
-        run: gh release create "$GITHUB_REF_NAME" --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" --notes "$NOTES"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTES: ${{ steps.changelog.outputs.notes }}
