@@ -4,3 +4,11 @@ repos:
     hooks:
       - id: clang-format
         types_or: [c++]
+  - repo: local
+    hooks:
+      - id: clang-tidy
+        name: clang-tidy
+        entry: clang-tidy-19 -p build/dev --warnings-as-errors=*
+        language: system
+        types_or: [c++]
+        files: ^(include|src)/
