@@ -1,8 +1,7 @@
-#include <agentforge/provider/openai.hpp>
-
+#include <forgeant/provider/openai.hpp>
 #include <stdexcept>
 
-namespace agentforge {
+namespace forgeant {
 
 namespace {
 
@@ -194,4 +193,4 @@ LlmResponse OpenAiProvider::chat(const Conversation& conversation, const ChatReq
     return deserialize_response(response_json);
 }
 
-} // namespace agentforge
+} // namespace forgeant

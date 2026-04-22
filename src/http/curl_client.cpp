@@ -1,10 +1,9 @@
-#include <agentforge/http/curl_client.hpp>
-
 #include <curl/curl.h>
+#include <forgeant/http/curl_client.hpp>
 #include <mutex>
 #include <stdexcept>
 
-namespace agentforge {
+namespace forgeant {
 
 namespace {
 
@@ -182,4 +181,4 @@ HttpResponse CurlHttpClient::post_stream(const std::string& url, const HttpHeade
     return perform_post(impl_->handle, url, headers, body, &on_chunk);
 }
 
-} // namespace agentforge
+} // namespace forgeant

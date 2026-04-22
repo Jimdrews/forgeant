@@ -1,9 +1,9 @@
-#include <agentforge/schema/param_schema.hpp>
-#include <agentforge/schema/schema.hpp>
-
 #include <catch2/catch_test_macros.hpp>
 
-using namespace agentforge;
+#include <forgeant/schema/param_schema.hpp>
+#include <forgeant/schema/schema.hpp>
+
+using namespace forgeant;
 
 TEST_CASE("Schema::string() produces string type", "[schema]") {
     auto s = Schema::string().build();

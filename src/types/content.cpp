@@ -1,8 +1,7 @@
-#include <agentforge/types/content.hpp>
-
+#include <forgeant/types/content.hpp>
 #include <stdexcept>
 
-namespace agentforge {
+namespace forgeant {
 
 ToolUseBlock::ToolUseBlock() = default;
 
@@ -64,4 +63,4 @@ void from_json(const Json& j, ContentBlock& block) {
     }
 }
 
-} // namespace agentforge
+} // namespace forgeant

@@ -1,6 +1,6 @@
-#include <agentforge/types/message.hpp>
+#include <forgeant/types/message.hpp>
 
-namespace agentforge {
+namespace forgeant {
 
 void to_json(Json& j, const Message& msg) {
     j = Json::object();
@@ -22,4 +22,4 @@ void from_json(const Json& j, Message& msg) {
     }
 }
 
-} // namespace agentforge
+} // namespace forgeant

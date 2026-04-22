@@ -1,10 +1,10 @@
-#include <agentforge/provider/anthropic.hpp>
-
 #include <catch2/catch_test_macros.hpp>
+
+#include <forgeant/provider/anthropic.hpp>
 
 #include "mock_http_client.hpp"
 
-using namespace agentforge;
+using namespace forgeant;
 
 namespace {
 

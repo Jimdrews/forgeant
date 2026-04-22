@@ -1,8 +1,8 @@
-#include <agentforge/types/conversation.hpp>
-
 #include <catch2/catch_test_macros.hpp>
 
-using namespace agentforge;
+#include <forgeant/types/conversation.hpp>
+
+using namespace forgeant;
 
 TEST_CASE("Conversation default has no system prompt", "[conversation]") {
     Conversation conv;

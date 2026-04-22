@@ -1,8 +1,7 @@
-#include <agentforge/http/curl_client.hpp>
-
 #include <catch2/catch_test_macros.hpp>
 
 #include <atomic>
+#include <forgeant/http/curl_client.hpp>
 #include <httplib.h>
 #include <thread>
 
@@ -64,7 +63,7 @@ class TestServer {
 
 TEST_CASE("Sync POST returns response", "[http]") {
     TestServer server;
-    agentforge::CurlHttpClient client;
+    forgeant::CurlHttpClient client;
 
     auto response = client.post(server.url("/echo"), {{"Content-Type", "application/json"}},
                                 R"({"hello": "world"})");
@@ -75,7 +74,7 @@ TEST_CASE("Sync POST returns response", "[http]") {
 
 TEST_CASE("Sync POST sends custom headers", "[http]") {
     TestServer server;
-    agentforge::CurlHttpClient client;
+    forgeant::CurlHttpClient client;
 
     auto response = client.post(server.url("/headers"), {{"X-Custom", "test-value"}}, "");
 
@@ -85,7 +84,7 @@ TEST_CASE("Sync POST sends custom headers", "[http]") {
 
 TEST_CASE("Async POST resolves future", "[http]") {
     TestServer server;
-    agentforge::CurlHttpClient client;
+    forgeant::CurlHttpClient client;
 
     auto future =
         client.async_post(server.url("/echo"), {{"Content-Type", "text/plain"}}, "async body");
@@ -97,7 +96,7 @@ TEST_CASE("Async POST resolves future", "[http]") {
 
 TEST_CASE("Streaming POST invokes callback", "[http]") {
     TestServer server;
-    agentforge::CurlHttpClient client;
+    forgeant::CurlHttpClient client;
 
     std::string accumulated;
     auto response = client.post_stream(server.url("/stream"), {{"Content-Type", "text/plain"}}, "",
@@ -113,7 +112,7 @@ TEST_CASE("Streaming POST invokes callback", "[http]") {
 
 TEST_CASE("Streaming POST abort via callback", "[http]") {
     TestServer server;
-    agentforge::CurlHttpClient client;
+    forgeant::CurlHttpClient client;
 
     int call_count = 0;
     client.post_stream(server.url("/stream"), {}, "", [&call_count](std::string_view /*chunk*/) {
@@ -125,16 +124,16 @@ TEST_CASE("Streaming POST abort via callback", "[http]") {
 }
 
 TEST_CASE("Connection refused throws", "[http]") {
-    agentforge::CurlHttpClient client;
+    forgeant::CurlHttpClient client;
 
     REQUIRE_THROWS_AS(client.post("http://127.0.0.1:1", {}, ""), std::runtime_error);
 }
 
 TEST_CASE("Timeout on slow server", "[http]") {
     TestServer server;
-    agentforge::CurlHttpClient::Config config;
+    forgeant::CurlHttpClient::Config config;
     config.transfer_timeout = std::chrono::seconds(1);
-    agentforge::CurlHttpClient client(config);
+    forgeant::CurlHttpClient client(config);
 
     REQUIRE_THROWS_AS(client.post(server.url("/slow"), {}, ""), std::runtime_error);
 }

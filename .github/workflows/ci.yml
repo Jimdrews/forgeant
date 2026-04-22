@@ -42,7 +42,7 @@ jobs:
         run: ctest --preset ci
 
       - name: Build benchmarks
-        run: cmake --build --preset ci --target agentforge_benchmarks
+        run: cmake --build --preset ci --target forgeant_benchmarks
 
   clang:
     name: Clang 19 (Ubuntu)
@@ -146,7 +146,7 @@ jobs:
         run: cmake --build --preset valgrind
 
       - name: Memcheck
-        run: valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all --track-origins=yes build/valgrind/tests/agentforge_tests
+        run: valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all --track-origins=yes build/valgrind/tests/forgeant_tests
 
   clang-tidy:
     name: clang-tidy

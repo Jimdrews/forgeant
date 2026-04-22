@@ -1,8 +1,8 @@
-#include <agentforge/json/json.hpp>
-
 #include <catch2/catch_test_macros.hpp>
 
-using namespace agentforge;
+#include <forgeant/json/json.hpp>
+
+using namespace forgeant;
 
 TEST_CASE("json::parse valid JSON", "[json]") {
     auto j = json::parse(R"({"key": 42})");

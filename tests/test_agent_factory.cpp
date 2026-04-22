@@ -1,9 +1,9 @@
-#include <agentforge/agent/agent.hpp>
-#include <agentforge/agent/options.hpp>
-
 #include <catch2/catch_test_macros.hpp>
 
-using namespace agentforge;
+#include <forgeant/agent/agent.hpp>
+#include <forgeant/agent/options.hpp>
+
+using namespace forgeant;
 
 TEST_CASE("Agent::create throws on invalid provider", "[factory]") {
     AgentOptions options{.api_key = "key", .model = "model"};

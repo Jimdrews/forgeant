@@ -1,10 +1,9 @@
-#include <agentforge/version.hpp>
-
 #include <benchmark/benchmark.h>
+#include <forgeant/version.hpp>
 
 static void BM_VersionString(benchmark::State& state) {
     for (auto _ : state) {
-        benchmark::DoNotOptimize(agentforge::version_string());
+        benchmark::DoNotOptimize(forgeant::version_string());
     }
 }
 

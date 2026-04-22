@@ -1,9 +1,9 @@
-#include <agentforge/version.hpp>
+#include <forgeant/version.hpp>
 
-namespace agentforge {
+namespace forgeant {
 
 std::string_view version_string() noexcept {
     return "0.2.0";
 }
 
-} // namespace agentforge
+} // namespace forgeant

@@ -1,8 +1,8 @@
-#include <agentforge/types/content.hpp>
-
 #include <catch2/catch_test_macros.hpp>
 
-using namespace agentforge;
+#include <forgeant/types/content.hpp>
+
+using namespace forgeant;
 
 TEST_CASE("TextBlock creation and equality", "[content]") {
     TextBlock a{.text = "hello"};

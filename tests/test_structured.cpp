@@ -1,13 +1,13 @@
-#include <agentforge/agent/error.hpp>
-#include <agentforge/provider/anthropic.hpp>
-#include <agentforge/provider/openai.hpp>
-#include <agentforge/structured/structured.hpp>
-
 #include <catch2/catch_test_macros.hpp>
+
+#include <forgeant/agent/error.hpp>
+#include <forgeant/provider/anthropic.hpp>
+#include <forgeant/provider/openai.hpp>
+#include <forgeant/structured/structured.hpp>
 
 #include "mock_http_client.hpp"
 
-using namespace agentforge;
+using namespace forgeant;
 
 struct TestOutput {
     std::string name;
@@ -15,7 +15,7 @@ struct TestOutput {
 };
 
 template <>
-struct agentforge::ParamSchema<TestOutput> {
+struct forgeant::ParamSchema<TestOutput> {
     static Json schema() {
         return Schema::object()
             .property("name", Schema::string().build())

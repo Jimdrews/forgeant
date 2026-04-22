@@ -1,8 +1,8 @@
-#include <agentforge/types/role.hpp>
-
 #include <catch2/catch_test_macros.hpp>
 
-using agentforge::Role;
+#include <forgeant/types/role.hpp>
+
+using forgeant::Role;
 
 TEST_CASE("Role enum values exist", "[role]") {
     REQUIRE(Role::system != Role::user);
@@ -11,7 +11,7 @@ TEST_CASE("Role enum values exist", "[role]") {
 
 TEST_CASE("Role JSON round-trip", "[role]") {
     auto test = [](Role role, const std::string& expected) {
-        agentforge::Json j;
+        forgeant::Json j;
         to_json(j, role);
         REQUIRE(j.get<std::string>() == expected);
 
@@ -26,6 +26,6 @@ TEST_CASE("Role JSON round-trip", "[role]") {
 }
 
 TEST_CASE("Invalid role string throws", "[role]") {
-    agentforge::Json j = "invalid";
+    forgeant::Json j = "invalid";
     REQUIRE_THROWS_AS(j.get<Role>(), std::invalid_argument);
 }

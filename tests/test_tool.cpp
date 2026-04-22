@@ -1,8 +1,8 @@
-#include <agentforge/tool/tool.hpp>
-
 #include <catch2/catch_test_macros.hpp>
 
-using namespace agentforge;
+#include <forgeant/tool/tool.hpp>
+
+using namespace forgeant;
 
 struct AddParams {
     int a = 0;
@@ -10,7 +10,7 @@ struct AddParams {
 };
 
 template <>
-struct agentforge::ParamSchema<AddParams> {
+struct forgeant::ParamSchema<AddParams> {
     static Json schema() {
         return Schema::object()
             .property("a", Schema::integer().description("First number").build())

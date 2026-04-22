@@ -1,8 +1,7 @@
-#include <agentforge/provider/anthropic.hpp>
-
+#include <forgeant/provider/anthropic.hpp>
 #include <stdexcept>
 
-namespace agentforge {
+namespace forgeant {
 
 namespace {
 
@@ -137,4 +136,4 @@ LlmResponse AnthropicProvider::chat(const Conversation& conversation, const Chat
     return deserialize_response(response_json);
 }
 
-} // namespace agentforge
+} // namespace forgeant

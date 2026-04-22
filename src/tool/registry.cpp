@@ -1,8 +1,7 @@
-#include <agentforge/tool/registry.hpp>
-
+#include <forgeant/tool/registry.hpp>
 #include <stdexcept>
 
-namespace agentforge {
+namespace forgeant {
 
 void ToolRegistry::add(Tool tool) {
     auto name = tool.name;
@@ -39,4 +38,4 @@ size_t ToolRegistry::size() const {
     return tools_.size();
 }
 
-} // namespace agentforge
+} // namespace forgeant

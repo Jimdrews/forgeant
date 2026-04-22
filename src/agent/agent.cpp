@@ -1,14 +1,13 @@
-#include <agentforge/agent/agent.hpp>
-#include <agentforge/http/curl_client.hpp>
-#include <agentforge/provider/anthropic.hpp>
-#include <agentforge/provider/openai.hpp>
-
 #include <algorithm>
+#include <forgeant/agent/agent.hpp>
+#include <forgeant/http/curl_client.hpp>
+#include <forgeant/provider/anthropic.hpp>
+#include <forgeant/provider/openai.hpp>
 #include <ranges>
 #include <stdexcept>
 #include <variant>
 
-namespace agentforge {
+namespace forgeant {
 
 namespace {
 
@@ -156,4 +155,4 @@ Agent::LoopResult Agent::execute_loop(Conversation working, const RunOverrides& 
                         accumulated, max_iterations, "max_iterations");
 }
 
-} // namespace agentforge
+} // namespace forgeant

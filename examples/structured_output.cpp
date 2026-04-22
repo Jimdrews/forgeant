@@ -1,6 +1,5 @@
-#include <agentforge/agentforge.hpp>
-
 #include <cstdlib>
+#include <forgeant/forgeant.hpp>
 #include <iostream>
 
 struct MovieReview {
@@ -10,20 +9,20 @@ struct MovieReview {
 };
 
 template <>
-struct agentforge::ParamSchema<MovieReview> {
-    static agentforge::Json schema() {
-        return agentforge::Schema::object()
-            .property("title", agentforge::Schema::string().description("Movie title").build())
+struct forgeant::ParamSchema<MovieReview> {
+    static forgeant::Json schema() {
+        return forgeant::Schema::object()
+            .property("title", forgeant::Schema::string().description("Movie title").build())
             .property("rating",
-                      agentforge::Schema::integer().description("Rating from 1 to 10").build())
+                      forgeant::Schema::integer().description("Rating from 1 to 10").build())
             .property("summary",
-                      agentforge::Schema::string().description("One sentence summary").build())
+                      forgeant::Schema::string().description("One sentence summary").build())
             .required({"title", "rating", "summary"})
             .build();
     }
 };
 
-void from_json(const agentforge::Json& j, MovieReview& review) {
+void from_json(const forgeant::Json& j, MovieReview& review) {
     j.at("title").get_to(review.title);
     j.at("rating").get_to(review.rating);
     j.at("summary").get_to(review.summary);
@@ -31,15 +30,15 @@ void from_json(const agentforge::Json& j, MovieReview& review) {
 
 int main() {
     try {
-        const char* provider = std::getenv("AGENTFORGE_PROVIDER");
-        const char* model = std::getenv("AGENTFORGE_MODEL");
-        const char* api_key = std::getenv("AGENTFORGE_API_KEY");
+        const char* provider = std::getenv("FORGEANT_PROVIDER");
+        const char* model = std::getenv("FORGEANT_MODEL");
+        const char* api_key = std::getenv("FORGEANT_API_KEY");
 
-        auto agent = agentforge::Agent::create(provider != nullptr ? provider : "ollama",
-                                               {
-                                                   .api_key = api_key != nullptr ? api_key : "",
-                                                   .model = model != nullptr ? model : "llama3",
-                                               });
+        auto agent = forgeant::Agent::create(provider != nullptr ? provider : "ollama",
+                                             {
+                                                 .api_key = api_key != nullptr ? api_key : "",
+                                                 .model = model != nullptr ? model : "llama3",
+                                             });
 
         auto result = agent->run<MovieReview>("Review the movie 'The Matrix' (1999).");
 

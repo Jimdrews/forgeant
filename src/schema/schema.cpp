@@ -1,6 +1,6 @@
-#include <agentforge/schema/schema.hpp>
+#include <forgeant/schema/schema.hpp>
 
-namespace agentforge {
+namespace forgeant {
 
 SchemaBuilder::SchemaBuilder(std::string type) {
     schema_["type"] = std::move(type);
@@ -68,4 +68,4 @@ SchemaBuilder Schema::array() {
     return SchemaBuilder("array");
 }
 
-} // namespace agentforge
+} // namespace forgeant

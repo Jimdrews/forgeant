@@ -1,9 +1,8 @@
-#include <agentforge/types/role.hpp>
-
+#include <forgeant/types/role.hpp>
 #include <stdexcept>
 #include <string>
 
-namespace agentforge {
+namespace forgeant {
 
 void to_json(Json& j, Role role) {
     switch (role) {
@@ -37,4 +36,4 @@ void from_json(const Json& j, Role& role) {
     }
 }
 
-} // namespace agentforge
+} // namespace forgeant

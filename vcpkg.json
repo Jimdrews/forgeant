@@ -1,5 +1,5 @@
 {
-  "name": "agentforge",
+  "name": "forgeant",
   "version": "0.1.0",
   "description": "C++ Agentic AI Framework",
   "dependencies": [

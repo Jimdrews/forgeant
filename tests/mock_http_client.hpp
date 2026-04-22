@@ -1,12 +1,11 @@
 #ifndef MOCK_HTTP_CLIENT_HPP
 #define MOCK_HTTP_CLIENT_HPP
 
-#include <agentforge/http/client.hpp>
-
+#include <forgeant/http/client.hpp>
 #include <functional>
 #include <stdexcept>
 
-namespace agentforge::testing {
+namespace forgeant::testing {
 
 class MockHttpClient : public HttpClient {
   public:
@@ -34,6 +33,6 @@ class MockHttpClient : public HttpClient {
     }
 };
 
-} // namespace agentforge::testing
+} // namespace forgeant::testing
 
 #endif // MOCK_HTTP_CLIENT_HPP

@@ -1,6 +1,6 @@
-#include <agentforge/tool/tool.hpp>
-
 #include <catch2/catch_test_macros.hpp>
+
+#include <forgeant/tool/tool.hpp>
 
 struct WeatherParams {
     std::string city;
@@ -8,17 +8,17 @@ struct WeatherParams {
 };
 
 template <>
-struct agentforge::ParamSchema<WeatherParams> {
-    static agentforge::Json schema() {
-        return agentforge::Schema::object()
-            .property("city", agentforge::Schema::string().description("The city name").build())
-            .property("unit", agentforge::Schema::string().description("Temperature unit").build())
+struct forgeant::ParamSchema<WeatherParams> {
+    static forgeant::Json schema() {
+        return forgeant::Schema::object()
+            .property("city", forgeant::Schema::string().description("The city name").build())
+            .property("unit", forgeant::Schema::string().description("Temperature unit").build())
             .required({"city"})
             .build();
     }
 };
 
-inline void from_json(const agentforge::Json& j, WeatherParams& params) {
+inline void from_json(const forgeant::Json& j, WeatherParams& params) {
     j.at("city").get_to(params.city);
     if (j.contains("unit")) {
         j.at("unit").get_to(params.unit);
@@ -26,7 +26,7 @@ inline void from_json(const agentforge::Json& j, WeatherParams& params) {
 }
 
 TEST_CASE("ParamSchema specialization generates correct schema", "[params]") {
-    auto schema = agentforge::ParamSchema<WeatherParams>::schema();
+    auto schema = forgeant::ParamSchema<WeatherParams>::schema();
     REQUIRE(schema["type"] == "object");
     REQUIRE(schema["properties"].contains("city"));
     REQUIRE(schema["properties"].contains("unit"));
@@ -35,17 +35,17 @@ TEST_CASE("ParamSchema specialization generates correct schema", "[params]") {
 }
 
 TEST_CASE("ParamSchema with from_json enables deserialization", "[params]") {
-    agentforge::Json j = agentforge::Json::object({{"city", "Denver"}, {"unit", "fahrenheit"}});
+    forgeant::Json j = forgeant::Json::object({{"city", "Denver"}, {"unit", "fahrenheit"}});
     auto params = j.get<WeatherParams>();
     REQUIRE(params.city == "Denver");
     REQUIRE(params.unit == "fahrenheit");
 }
 
 TEST_CASE("ParamSchema works with make_tool", "[params]") {
-    auto tool = agentforge::make_tool<WeatherParams>(
+    auto tool = forgeant::make_tool<WeatherParams>(
         "weather", "Get weather", [](WeatherParams p) { return p.city + ": 72F " + p.unit; });
 
     auto result =
-        tool.execute(agentforge::Json::object({{"city", "Denver"}, {"unit", "fahrenheit"}}));
+        tool.execute(forgeant::Json::object({{"city", "Denver"}, {"unit", "fahrenheit"}}));
     REQUIRE(result == "Denver: 72F fahrenheit");
 }

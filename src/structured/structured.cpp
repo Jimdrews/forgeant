@@ -1,9 +1,8 @@
-#include <agentforge/structured/structured.hpp>
-
+#include <forgeant/structured/structured.hpp>
 #include <stdexcept>
 #include <variant>
 
-namespace agentforge {
+namespace forgeant {
 
 Json extract_json_from_response(const LlmResponse& response) {
     for (const auto& block : response.message.content) {
@@ -14,4 +13,4 @@ Json extract_json_from_response(const LlmResponse& response) {
     throw std::runtime_error("structured output response contains no text content");
 }
 
-} // namespace agentforge
+} // namespace forgeant

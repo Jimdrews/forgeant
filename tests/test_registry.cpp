@@ -1,15 +1,15 @@
-#include <agentforge/tool/registry.hpp>
-
 #include <catch2/catch_test_macros.hpp>
 
-using namespace agentforge;
+#include <forgeant/tool/registry.hpp>
+
+using namespace forgeant;
 
 struct EchoParams {
     std::string text;
 };
 
 template <>
-struct agentforge::ParamSchema<EchoParams> {
+struct forgeant::ParamSchema<EchoParams> {
     static Json schema() {
         return Schema::object()
             .property("text", Schema::string().build())

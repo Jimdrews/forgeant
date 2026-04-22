@@ -1,7 +1,7 @@
 find_package(benchmark REQUIRED)
 find_package(httplib REQUIRED)
 
-add_executable(agentforge_benchmarks
+add_executable(forgeant_benchmarks
     bench_version.cpp
     bench_message.cpp
     bench_http.cpp
@@ -11,9 +11,9 @@ add_executable(agentforge_benchmarks
     bench_agent.cpp
 )
 
-target_link_libraries(agentforge_benchmarks
+target_link_libraries(forgeant_benchmarks
     PRIVATE
-        agentforge::agentforge
+        forgeant::forgeant
         benchmark::benchmark
         benchmark::benchmark_main
         httplib::httplib

@@ -1,21 +1,20 @@
-#include <agentforge/agentforge.hpp>
-
 #include <cstdlib>
+#include <forgeant/forgeant.hpp>
 #include <iostream>
 
 int main() {
     try {
-        const char* provider = std::getenv("AGENTFORGE_PROVIDER");
-        const char* model = std::getenv("AGENTFORGE_MODEL");
-        const char* api_key = std::getenv("AGENTFORGE_API_KEY");
+        const char* provider = std::getenv("FORGEANT_PROVIDER");
+        const char* model = std::getenv("FORGEANT_MODEL");
+        const char* api_key = std::getenv("FORGEANT_API_KEY");
 
-        auto agent = agentforge::Agent::create(
-            provider != nullptr ? provider : "ollama",
-            {
-                .api_key = api_key != nullptr ? api_key : "",
-                .model = model != nullptr ? model : "llama3",
-                .system_prompt = "You are a helpful assistant. Be concise.",
-            });
+        auto agent =
+            forgeant::Agent::create(provider != nullptr ? provider : "ollama",
+                                    {
+                                        .api_key = api_key != nullptr ? api_key : "",
+                                        .model = model != nullptr ? model : "llama3",
+                                        .system_prompt = "You are a helpful assistant. Be concise.",
+                                    });
 
         auto result = agent->run("What is the capital of France? Answer in one sentence.");
 

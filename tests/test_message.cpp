@@ -1,8 +1,8 @@
-#include <agentforge/types/message.hpp>
-
 #include <catch2/catch_test_macros.hpp>
 
-using namespace agentforge;
+#include <forgeant/types/message.hpp>
+
+using namespace forgeant;
 
 TEST_CASE("Message with single text block", "[message]") {
     Message msg(Role::assistant, std::vector<ContentBlock>{TextBlock{.text = "hello"}});

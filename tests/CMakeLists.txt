@@ -1,7 +1,7 @@
 find_package(Catch2 3 REQUIRED)
 find_package(httplib REQUIRED)
 
-add_executable(agentforge_tests
+add_executable(forgeant_tests
     test_json.cpp
     test_version.cpp
     test_role.cpp
@@ -20,12 +20,12 @@ add_executable(agentforge_tests
     test_agent_factory.cpp
 )
 
-target_link_libraries(agentforge_tests
+target_link_libraries(forgeant_tests
     PRIVATE
-        agentforge::agentforge
+        forgeant::forgeant
         Catch2::Catch2WithMain
         httplib::httplib
 )
 
 include(Catch)
-catch_discover_tests(agentforge_tests)
+catch_discover_tests(forgeant_tests)

@@ -1,6 +1,5 @@
-#include <agentforge/http/curl_client.hpp>
-
 #include <benchmark/benchmark.h>
+#include <forgeant/http/curl_client.hpp>
 #include <httplib.h>
 #include <thread>
 
@@ -48,7 +47,7 @@ BenchServer& get_server() {
 
 static void BM_HttpPostSync(benchmark::State& state) {
     auto& server = get_server();
-    agentforge::CurlHttpClient client;
+    forgeant::CurlHttpClient client;
     std::string body = R"({"message": "hello"})";
 
     for (auto _ : state) {

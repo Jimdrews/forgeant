@@ -1,17 +1,16 @@
-#include <agentforge/agent/agent.hpp>
-#include <agentforge/schema/schema.hpp>
-
 #include <benchmark/benchmark.h>
+#include <forgeant/agent/agent.hpp>
+#include <forgeant/schema/schema.hpp>
 #include <queue>
 
 namespace {
 
-class BenchProvider : public agentforge::LlmProvider {
+class BenchProvider : public forgeant::LlmProvider {
   public:
-    agentforge::LlmResponse canned;
+    forgeant::LlmResponse canned;
 
-    agentforge::LlmResponse chat(const agentforge::Conversation&,
-                                 const agentforge::ChatRequest&) override {
+    forgeant::LlmResponse chat(const forgeant::Conversation&,
+                               const forgeant::ChatRequest&) override {
         return canned;
     }
 };
@@ -20,11 +19,11 @@ class BenchProvider : public agentforge::LlmProvider {
 
 static void BM_AgentRunNoTools(benchmark::State& state) {
     BenchProvider provider;
-    provider.canned.message = agentforge::Message(agentforge::Role::assistant, "Hello");
+    provider.canned.message = forgeant::Message(forgeant::Role::assistant, "Hello");
     provider.canned.finish_reason = "end_turn";
 
     for (auto _ : state) {
-        agentforge::Agent agent(provider);
+        forgeant::Agent agent(provider);
         auto result = agent.run("Hi");
         benchmark::DoNotOptimize(result);
     }

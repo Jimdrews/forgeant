@@ -1,19 +1,18 @@
-#include <agentforge/types.hpp>
-
 #include <benchmark/benchmark.h>
+#include <forgeant/types.hpp>
 
 static void BM_MessageCreate(benchmark::State& state) {
     for (auto _ : state) {
-        agentforge::Message msg(agentforge::Role::user, "Hello, world!");
+        forgeant::Message msg(forgeant::Role::user, "Hello, world!");
         benchmark::DoNotOptimize(msg);
     }
 }
 BENCHMARK(BM_MessageCreate);
 
 static void BM_MessageToJson(benchmark::State& state) {
-    agentforge::Message msg(agentforge::Role::assistant, "Hello, world!");
+    forgeant::Message msg(forgeant::Role::assistant, "Hello, world!");
     for (auto _ : state) {
-        agentforge::Json j;
+        forgeant::Json j;
         to_json(j, msg);
         benchmark::DoNotOptimize(j);
     }
@@ -21,11 +20,11 @@ static void BM_MessageToJson(benchmark::State& state) {
 BENCHMARK(BM_MessageToJson);
 
 static void BM_MessageFromJson(benchmark::State& state) {
-    agentforge::Message msg(agentforge::Role::assistant, "Hello, world!");
-    agentforge::Json j;
+    forgeant::Message msg(forgeant::Role::assistant, "Hello, world!");
+    forgeant::Json j;
     to_json(j, msg);
     for (auto _ : state) {
-        auto restored = j.get<agentforge::Message>();
+        auto restored = j.get<forgeant::Message>();
         benchmark::DoNotOptimize(restored);
     }
 }

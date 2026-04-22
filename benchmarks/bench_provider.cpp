@@ -1,7 +1,6 @@
-#include <agentforge/provider/anthropic.hpp>
-#include <agentforge/provider/openai.hpp>
-
 #include <benchmark/benchmark.h>
+#include <forgeant/provider/anthropic.hpp>
+#include <forgeant/provider/openai.hpp>
 
 #include "../tests/mock_http_client.hpp"
 
@@ -23,15 +22,15 @@ const std::string OPENAI_RESPONSE = R"({
 } // namespace
 
 static void BM_AnthropicSerializeDeserialize(benchmark::State& state) {
-    agentforge::testing::MockHttpClient mock;
+    forgeant::testing::MockHttpClient mock;
     mock.canned_response.status_code = 200;
     mock.canned_response.body = ANTHROPIC_RESPONSE;
 
-    agentforge::ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
-    agentforge::AnthropicProvider provider(mock, config);
+    forgeant::ProviderConfig config{.api_key = "key", .model = "claude-sonnet-4-20250514"};
+    forgeant::AnthropicProvider provider(mock, config);
 
-    agentforge::Conversation conv("You are helpful.");
-    conv.add(agentforge::Message(agentforge::Role::user, "Hello world"));
+    forgeant::Conversation conv("You are helpful.");
+    conv.add(forgeant::Message(forgeant::Role::user, "Hello world"));
 
     for (auto _ : state) {
         auto response = provider.chat(conv);
@@ -41,15 +40,15 @@ static void BM_AnthropicSerializeDeserialize(benchmark::State& state) {
 BENCHMARK(BM_AnthropicSerializeDeserialize);
 
 static void BM_OpenAiSerializeDeserialize(benchmark::State& state) {
-    agentforge::testing::MockHttpClient mock;
+    forgeant::testing::MockHttpClient mock;
     mock.canned_response.status_code = 200;
     mock.canned_response.body = OPENAI_RESPONSE;
 
-    agentforge::ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
-    agentforge::OpenAiProvider provider(mock, config);
+    forgeant::ProviderConfig config{.api_key = "key", .model = "gpt-4o"};
+    forgeant::OpenAiProvider provider(mock, config);
 
-    agentforge::Conversation conv("You are helpful.");
-    conv.add(agentforge::Message(agentforge::Role::user, "Hello world"));
+    forgeant::Conversation conv("You are helpful.");
+    conv.add(forgeant::Message(forgeant::Role::user, "Hello world"));
 
     for (auto _ : state) {
         auto response = provider.chat(conv);
