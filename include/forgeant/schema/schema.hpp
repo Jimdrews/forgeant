@@ -9,6 +9,11 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup structured
+ * @brief Fluent builder for a single JSON Schema fragment (description, properties, required,
+ * enum).
+ */
 class SchemaBuilder {
   public:
     SchemaBuilder& description(std::string_view desc);
@@ -27,6 +32,10 @@ class SchemaBuilder {
     Json schema_;
 };
 
+/**
+ * @ingroup structured
+ * @brief Entry point for building JSON Schemas: `Schema::object().property(...).build()`.
+ */
 class Schema {
   public:
     static SchemaBuilder string();

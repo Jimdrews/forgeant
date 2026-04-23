@@ -8,6 +8,10 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup types
+ * @brief A single turn in a conversation: a role and one or more content blocks.
+ */
 struct Message {
     Role role = Role::user;
     std::vector<ContentBlock> content;

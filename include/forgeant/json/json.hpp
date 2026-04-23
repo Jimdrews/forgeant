@@ -24,6 +24,11 @@ struct IsVector<std::vector<T, A>> : std::true_type {};
 
 } // namespace detail
 
+/**
+ * @ingroup transport
+ * @brief Forgeant's internal JSON value type: null, bool, integer, number, string, array, or
+ * object.
+ */
 class Json {
   public:
     using null_t = std::nullptr_t;

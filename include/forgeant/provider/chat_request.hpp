@@ -8,6 +8,10 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup providers
+ * @brief Per-call inputs to `LlmProvider::chat()`: available tools and an optional output schema.
+ */
 struct ChatRequest {
     std::span<const ToolView> tools;
     std::optional<Json> output_schema;

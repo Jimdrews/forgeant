@@ -7,6 +7,11 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup agents
+ * @brief Return value of `Agent::run()`: the parsed output plus the full transcript, usage, and
+ * metadata.
+ */
 template <typename T = std::string>
 struct AgentResult {
     T output{};

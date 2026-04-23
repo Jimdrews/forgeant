@@ -1,0 +1,456 @@
+/* Forgeant overlay on doxygen-awesome-css.
+ * Loaded after the awesome sheets, so CSS variable overrides win. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ============================================================
+   Palette
+   ============================================================ */
+
+html {
+    /* Forge ember — warm industrial orange, not neon. */
+    --primary-color: #ea580c;
+    --primary-dark-color: #c2410c;
+    --primary-light-color: #f97316;
+    --primary-lighter-color: #fed7aa;
+    --primary-lightest-color: #fff7ed;
+
+    /* Logo-matched deep navy for text; warm cream for paper. */
+    --page-foreground-color: #1a1a2e;
+    --page-secondary-foreground-color: #52525b;
+    --page-background-color: #fafaf9;
+
+    /* Sidebar sits slightly darker than paper. */
+    --side-nav-background: #f4f1ec;
+    --side-nav-foreground: #1a1a2e;
+    --side-nav-resizer-background: #e4572e;
+
+    /* Code blocks: subtle warm tint so they sit apart from prose. */
+    --code-background: #f7f2ec;
+    --fragment-background: #1a1a2e;
+    --fragment-foreground: #f4f4f5;
+    --fragment-keyword: #fdba74;
+    --fragment-keywordtype: #fed7aa;
+    --fragment-keywordflow: #fdba74;
+    --fragment-token: #a7f3d0;
+    --fragment-comment: #71717a;
+    --fragment-preprocessor: #fdba74;
+
+    /* Tighter reading width; also centers content. */
+    --content-maxwidth: 1100px;
+
+    /* Slightly rounder corners feel less dated. */
+    --border-radius-large: 10px;
+    --border-radius-small: 6px;
+
+    /* Warmer borders. */
+    --separator-color: #e4d8c8;
+}
+
+html.dark-mode,
+html.dark-mode:root {
+    --primary-color: #fb923c;
+    --primary-dark-color: #ea580c;
+    --primary-light-color: #fdba74;
+    --primary-lighter-color: #7c2d12;
+    --primary-lightest-color: #431407;
+
+    --page-foreground-color: #e2e8f0;
+    --page-secondary-foreground-color: #94a3b8;
+    --page-background-color: #0f0f1a;
+
+    --side-nav-background: #151523;
+    --side-nav-foreground: #e2e8f0;
+    --side-nav-resizer-background: #fb923c;
+
+    --code-background: #1a1a2e;
+    --fragment-background: #0a0a14;
+    --fragment-foreground: #e2e8f0;
+
+    --separator-color: #2a2a3e;
+}
+
+/* Dark via system preference — beats doxygen-awesome's own
+ * @media (prefers-color-scheme: dark) block on selector specificity
+ * because their selector is html:not(.light-mode) and ours matches it. */
+@media (prefers-color-scheme: dark) {
+    html:not(.light-mode) {
+        --primary-color: #fb923c;
+        --primary-dark-color: #ea580c;
+        --primary-light-color: #fdba74;
+        --primary-lighter-color: #7c2d12;
+        --primary-lightest-color: #431407;
+
+        --page-foreground-color: #e2e8f0;
+        --page-secondary-foreground-color: #94a3b8;
+        --page-background-color: #0f0f1a;
+
+        --side-nav-background: #151523;
+        --side-nav-foreground: #e2e8f0;
+        --side-nav-resizer-background: #fb923c;
+
+        --code-background: #1a1a2e;
+        --fragment-background: #0a0a14;
+        --fragment-foreground: #e2e8f0;
+
+        --separator-color: #2a2a3e;
+    }
+}
+
+/* ============================================================
+   Typography + heading hierarchy
+   ============================================================ */
+
+html {
+    --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-family-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Consolas, monospace;
+}
+
+body,
+.contents,
+#nav-tree,
+#side-nav,
+#titlearea,
+.memproto,
+.memdoc,
+.textblock,
+table.directory,
+.navpath li.navelem a {
+    font-family: var(--font-family-sans);
+}
+
+body,
+.contents {
+    font-size: 16px;
+    line-height: 1.65;
+}
+
+/* Code everywhere gets the mono pair. */
+pre,
+code,
+tt,
+kbd,
+samp,
+.fragment,
+pre.fragment,
+div.fragment,
+.memname,
+.memproto table,
+.memproto .paramtype,
+.memproto .paramname,
+span.mlabel {
+    font-family: var(--font-family-mono);
+    font-feature-settings: 'calt' 1, 'liga' 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    letter-spacing: -0.01em;
+    color: var(--page-foreground-color);
+}
+
+h1.title,
+div.title,
+h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-top: 0.6em;
+    padding-bottom: 0.35em;
+    border-bottom: 3px solid var(--primary-color);
+    display: inline-block;
+    min-width: 60%;
+}
+
+h2,
+h2.groupheader {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 2em;
+    padding-bottom: 0.25em;
+    border-bottom: 1px solid var(--separator-color);
+    color: var(--page-foreground-color);
+}
+
+h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-top: 1.6em;
+    color: var(--primary-dark-color);
+}
+
+html.dark-mode h3 {
+    color: var(--primary-color);
+}
+
+/* ============================================================
+   Kill the grey chip behind hovered headings.
+   doxygen-awesome's paragraph-link injects a span with a background.
+   We keep the link target but remove the blobby background. */
+
+a.anchorlink,
+.paragraph-link {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+}
+
+h2:hover .paragraph-link,
+h3:hover .paragraph-link,
+h4:hover .paragraph-link {
+    opacity: 0.6;
+}
+
+/* ============================================================
+   Links
+   ============================================================ */
+
+a,
+a:visited {
+    color: var(--primary-dark-color);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 120ms ease;
+}
+
+a:hover {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+html.dark-mode a,
+html.dark-mode a:visited {
+    color: var(--primary-color);
+}
+
+html.dark-mode a:hover {
+    color: var(--primary-light-color);
+    border-bottom-color: var(--primary-light-color);
+}
+
+/* ============================================================
+   Sidebar
+   ============================================================ */
+
+#side-nav {
+    border-right: 1px solid var(--separator-color);
+}
+
+#nav-tree .item,
+#nav-tree a {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border-bottom: none !important;
+}
+
+#nav-tree a:hover {
+    background: var(--primary-lightest-color);
+    color: var(--primary-dark-color);
+}
+
+html.dark-mode #nav-tree a:hover,
+@media (prefers-color-scheme: dark) {
+    html:not(.light-mode) #nav-tree a:hover {
+        background: var(--primary-lighter-color);
+        color: var(--primary-light-color);
+    }
+}
+
+#nav-tree .selected,
+#nav-tree .selected a {
+    background: var(--primary-color) !important;
+    color: #fff !important;
+    border-radius: 4px;
+}
+
+#nav-tree .selected a:hover {
+    background: var(--primary-dark-color) !important;
+    color: #fff !important;
+}
+
+/* Expand/collapse arrows — make them actually visible.
+ * Doxygen injects a <span class="arrow"> containing ▶ or ▼. */
+#nav-tree .arrow {
+    color: var(--primary-color);
+    font-size: 10px;
+    width: 16px;
+    display: inline-block;
+    text-align: center;
+    opacity: 0.9;
+    margin-right: 2px;
+    transition: transform 140ms ease, opacity 140ms ease;
+}
+
+#nav-tree .item:hover .arrow {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* Items that CAN expand/collapse — give them slight weight so
+ * the eye sees them as section headers rather than plain links. */
+#nav-tree .item:has(> .arrow) > a,
+#nav-tree .item:has(> span.arrow) > a {
+    font-weight: 600;
+}
+
+/* Top-level section rows (Guides, Modules, API reference, Examples)
+ * get extra breathing room and a subtle divider underneath. */
+#nav-tree > div > ul > li {
+    margin-bottom: 2px;
+}
+
+#nav-tree > div > ul > li > .item {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid var(--separator-color);
+}
+
+#nav-tree > div > ul > li:last-child > .item {
+    border-bottom: none;
+}
+
+#nav-tree > div > ul > li > .item > a {
+    font-weight: 700;
+    font-size: 0.98em;
+    letter-spacing: -0.005em;
+}
+
+/* Small chevron hint on expandable top-level rows even before hover. */
+#nav-tree > div > ul > li > .item > .arrow {
+    color: var(--primary-color);
+    opacity: 1;
+}
+
+/* Hide the redundant "forgeant" root wrapper in the tree — the project
+ * name is already in the header above. The real top-level sections
+ * (Guides / Modules / API reference / Examples) become visually top-level.
+ * The mainpage is still reachable via the header logo + `/index.html`. */
+#nav-tree > div > ul > li:first-child > .item {
+    display: none;
+}
+
+/* Force the wrapper's children always visible and un-indent them. */
+#nav-tree > div > ul > li:first-child > ul {
+    display: block !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* Brand strip above the project name in the sidebar. */
+#projectname,
+#projectbrief {
+    color: var(--page-foreground-color);
+}
+
+#projectnumber {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.85em;
+    padding: 2px 8px;
+    background: var(--primary-lightest-color);
+    border-radius: 999px;
+}
+
+html.dark-mode #projectnumber {
+    background: var(--primary-lighter-color);
+    color: var(--primary-light-color);
+}
+
+/* ============================================================
+   Code blocks
+   ============================================================ */
+
+div.fragment,
+pre.fragment {
+    border-left: 3px solid var(--primary-color);
+    border-radius: var(--border-radius-small);
+    padding: 1em 1.2em;
+    box-shadow: 0 1px 3px rgba(26, 26, 46, 0.06);
+    font-size: 0.92em;
+    line-height: 1.55;
+}
+
+code,
+tt {
+    background: var(--code-background);
+    color: var(--primary-dark-color);
+    padding: 0.12em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+html.dark-mode code,
+html.dark-mode tt {
+    color: var(--primary-color);
+}
+
+/* ============================================================
+   Member docs — tighten the dense function/member tables
+   ============================================================ */
+
+.memitem {
+    margin-top: 1.4em;
+    border-radius: var(--border-radius-large);
+    border: 1px solid var(--separator-color);
+    overflow: hidden;
+    box-shadow: none;
+}
+
+.memproto {
+    background: var(--code-background) !important;
+    border-bottom: 1px solid var(--separator-color);
+    padding: 0.8em 1em !important;
+    font-size: 0.95em;
+}
+
+.memdoc {
+    padding: 1em 1.2em !important;
+    background: var(--page-background-color);
+}
+
+html.dark-mode .memproto {
+    background: var(--code-background) !important;
+}
+
+/* ============================================================
+   Group (module) pages — give them a proper hero
+   ============================================================ */
+
+.groupheader {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.3em;
+}
+
+.textblock p:first-of-type {
+    font-size: 1.05em;
+    color: var(--page-secondary-foreground-color);
+}
+
+/* ============================================================
+   Tables (e.g. member summary grids)
+   ============================================================ */
+
+.directory tr.even {
+    background: var(--primary-lightest-color);
+}
+
+html.dark-mode .directory tr.even {
+    background: rgba(234, 88, 12, 0.05);
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+
+hr.footer,
+.footer {
+    border-top: 1px solid var(--separator-color);
+    color: var(--page-secondary-foreground-color);
+    font-size: 0.82em;
+    padding: 1.2em 0;
+    text-align: center;
+}

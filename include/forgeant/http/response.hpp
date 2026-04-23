@@ -6,6 +6,10 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup transport
+ * @brief Status code, headers, and body of an HTTP response.
+ */
 struct HttpResponse {
     int status_code = 0;
     std::unordered_map<std::string, std::string> headers;

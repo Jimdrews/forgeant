@@ -7,6 +7,10 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup providers
+ * @brief Built-in `LlmProvider` for the OpenAI Chat Completions API, also used for Ollama.
+ */
 class OpenAiProvider : public LlmProvider {
   public:
     OpenAiProvider(HttpClient& client, ProviderConfig config);

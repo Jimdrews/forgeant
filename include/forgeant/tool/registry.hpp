@@ -9,6 +9,10 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup tools
+ * @brief Name-keyed collection of `Tool` instances; the agent dispatches tool calls through this.
+ */
 class ToolRegistry {
   public:
     void add(Tool tool);

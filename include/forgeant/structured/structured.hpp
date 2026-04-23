@@ -14,8 +14,23 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup structured
+ * @brief Extract the JSON payload from an `LlmResponse`, tolerating models that wrap it in prose.
+ */
 Json extract_json_from_response(const LlmResponse& response);
 
+/**
+ * @ingroup structured
+ * @brief Run a typed exchange against a provider directly, without an `Agent` tool loop.
+ *
+ * This is the low-level primitive behind `Agent::run<T>()` for callers that only need
+ * one structured-output call (no tools, no ReAct loop). It attaches the JSON Schema for
+ * `T` to the request, parses the response into `T`, and retries up to
+ * `config.max_retries` times on parse failure.
+ *
+ * @throws AgentRunError on provider failure or when the last attempt still cannot be parsed.
+ */
 template <typename T>
 AgentResult<T> structured(LlmProvider& provider, Conversation working,
                           StructuredConfig config = {}) {

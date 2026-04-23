@@ -7,6 +7,10 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup providers
+ * @brief Built-in `LlmProvider` for Anthropic's Messages API (Claude models).
+ */
 class AnthropicProvider : public LlmProvider {
   public:
     AnthropicProvider(HttpClient& client, ProviderConfig config);

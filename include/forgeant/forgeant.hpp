@@ -1,6 +1,26 @@
 #ifndef FORGEANT_FORGEANT_HPP
 #define FORGEANT_FORGEANT_HPP
 
+/**
+ * @defgroup agents Agents
+ * @brief The agent runtime: configuration, the ReAct-style loop, and its results and errors.
+ *
+ * @defgroup tools Tools
+ * @brief Defining callable tools and making them available to the agent.
+ *
+ * @defgroup providers Providers
+ * @brief LLM backend interface and the built-in Anthropic, OpenAI, and Ollama implementations.
+ *
+ * @defgroup structured Structured Output
+ * @brief Typed, schema-validated responses via `run<T>()`, including JSON Schema construction.
+ *
+ * @defgroup types Core Types
+ * @brief Messages, roles, content blocks, conversations, and usage accounting.
+ *
+ * @defgroup transport Transport
+ * @brief HTTP client abstraction and the curl-backed default implementation.
+ */
+
 #include <forgeant/agent/agent.hpp>
 #include <forgeant/agent/error.hpp>
 #include <forgeant/agent/options.hpp>

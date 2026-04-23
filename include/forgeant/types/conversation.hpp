@@ -9,6 +9,10 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup types
+ * @brief An ordered sequence of messages plus an optional system prompt.
+ */
 class Conversation {
   public:
     Conversation() = default;

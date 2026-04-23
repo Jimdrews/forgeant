@@ -6,6 +6,10 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup transport
+ * @brief Default `HttpClient` implementation backed by libcurl.
+ */
 class CurlHttpClient : public HttpClient {
   public:
     struct Config {

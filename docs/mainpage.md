@@ -16,9 +16,17 @@ auto result = agent->run("What is the capital of France?");
 std::cout << result.output << std::endl;
 ```
 
-## Where to look
+## Guides
 
-- [All classes](annotated.html) — full public surface, including `forgeant::Agent`, `forgeant::Tool`, and the provider types.
+- @ref getting-started — install, pick a provider, first `Agent::run()`.
+- @ref tools-guide — expose callable capabilities to the model.
+- @ref structured-output-guide — `run<T>()` for typed responses.
+- @ref multi-turn-guide — carrying a `Conversation` across calls.
+
+## Reference
+
+- [Modules](modules.html) — the six semantic groups: agents, tools, providers, structured output, core types, transport.
+- [All classes](annotated.html) — full public surface.
 - [Namespaces](namespaces.html) — browse by namespace.
 - [Files](files.html) — browse the headers under `include/forgeant/`.
 - [Examples](examples.html) — complete runnable programs.

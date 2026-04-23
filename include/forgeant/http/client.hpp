@@ -10,9 +10,23 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup transport
+ * @brief Case-insensitive-in-spirit map of HTTP header name to value.
+ */
 using HttpHeaders = std::unordered_map<std::string, std::string>;
+
+/**
+ * @ingroup transport
+ * @brief Callback invoked for each streamed response chunk; return `false` to stop.
+ */
 using StreamCallback = std::function<bool(std::string_view)>;
 
+/**
+ * @ingroup transport
+ * @brief Abstract HTTP client (POST, async POST, streaming POST); lets providers be mocked in
+ * tests.
+ */
 class HttpClient {
   public:
     virtual ~HttpClient() = default;

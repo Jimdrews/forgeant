@@ -7,12 +7,20 @@
 
 namespace forgeant {
 
+/**
+ * @ingroup types
+ * @brief Plain-text content inside a message.
+ */
 struct TextBlock {
     std::string text;
 
     bool operator==(const TextBlock&) const = default;
 };
 
+/**
+ * @ingroup types
+ * @brief A model-issued tool call: name, unique id, and JSON arguments.
+ */
 struct ToolUseBlock {
     std::string id;
     std::string name;
@@ -32,6 +40,10 @@ struct ToolUseBlock {
     }
 };
 
+/**
+ * @ingroup types
+ * @brief The result of executing a tool call, referenced back to its originating `ToolUseBlock`.
+ */
 struct ToolResultBlock {
     std::string tool_use_id;
     std::string content;
@@ -40,6 +52,10 @@ struct ToolResultBlock {
     bool operator==(const ToolResultBlock&) const = default;
 };
 
+/**
+ * @ingroup types
+ * @brief One of `TextBlock`, `ToolUseBlock`, or `ToolResultBlock` — the atoms of a message.
+ */
 using ContentBlock = std::variant<TextBlock, ToolUseBlock, ToolResultBlock>;
 
 void to_json(Json& j, const TextBlock& block);

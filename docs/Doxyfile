@@ -12,9 +12,9 @@ PROJECT_BRIEF          = "Build LLM-powered agents in C++"
 PROJECT_LOGO           = docs/logo-light.svg
 PROJECT_NUMBER         = @PROJECT_NUMBER@
 
-INPUT                  = include/forgeant docs/mainpage.md
+INPUT                  = include/forgeant docs/mainpage.md docs/guides
 RECURSIVE              = YES
-FILE_PATTERNS          = *.hpp
+FILE_PATTERNS          = *.hpp *.md
 USE_MDFILE_AS_MAINPAGE = docs/mainpage.md
 
 EXAMPLE_PATH           = examples
@@ -31,15 +31,31 @@ OUTPUT_DIRECTORY       = build/docs
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
 
+LAYOUT_FILE            = docs/DoxygenLayout.xml
+
 GENERATE_TREEVIEW      = YES
 DISABLE_INDEX          = NO
 FULL_SIDEBAR           = NO
 HTML_COLORSTYLE        = LIGHT
 
 HTML_EXTRA_STYLESHEET  = docs/doxygen-awesome-css/doxygen-awesome.css \
-                         docs/doxygen-awesome-css/doxygen-awesome-sidebar-only.css
+                         docs/doxygen-awesome-css/doxygen-awesome-sidebar-only.css \
+                         docs/forgeant.css
 
 HTML_EXTRA_FILES       = docs/doxygen-awesome-css/doxygen-awesome-darkmode-toggle.js \
                          docs/doxygen-awesome-css/doxygen-awesome-fragment-copy-button.js \
                          docs/doxygen-awesome-css/doxygen-awesome-paragraph-link.js \
                          docs/doxygen-awesome-css/doxygen-awesome-interactive-toc.js
+
+HAVE_DOT               = YES
+CLASS_DIAGRAMS         = YES
+CLASS_GRAPH            = YES
+GRAPHICAL_HIERARCHY    = YES
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+
+COLLABORATION_GRAPH    = NO
+INCLUDE_GRAPH          = NO
+INCLUDED_BY_GRAPH      = NO
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
