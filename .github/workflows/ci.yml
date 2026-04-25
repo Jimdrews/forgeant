@@ -36,10 +36,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: vcpkg-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-v2-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            vcpkg-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-
-            vcpkg-${{ runner.os }}-gcc14-
+            vcpkg-v2-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-
+            vcpkg-v2-${{ runner.os }}-gcc14-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -78,10 +78,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-v2-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-
-            vcpkg-${{ runner.os }}-clang19-
+            vcpkg-v2-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-
+            vcpkg-v2-${{ runner.os }}-clang19-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -112,10 +112,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: vcpkg-${{ runner.os }}-appleclang-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-v2-${{ runner.os }}-appleclang-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            vcpkg-${{ runner.os }}-appleclang-${{ env.VCPKG_COMMIT }}-
-            vcpkg-${{ runner.os }}-appleclang-
+            vcpkg-v2-${{ runner.os }}-appleclang-${{ env.VCPKG_COMMIT }}-
+            vcpkg-v2-${{ runner.os }}-appleclang-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -148,10 +148,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-v2-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-
-            vcpkg-${{ runner.os }}-clang19-
+            vcpkg-v2-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-
+            vcpkg-v2-${{ runner.os }}-clang19-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -187,10 +187,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: vcpkg-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-v2-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            vcpkg-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-
-            vcpkg-${{ runner.os }}-gcc14-
+            vcpkg-v2-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-
+            vcpkg-v2-${{ runner.os }}-gcc14-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
@@ -226,10 +226,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-v2-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-
-            vcpkg-${{ runner.os }}-clang19-
+            vcpkg-v2-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-
+            vcpkg-v2-${{ runner.os }}-clang19-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
