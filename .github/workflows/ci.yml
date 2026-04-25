@@ -10,7 +10,8 @@ on:
 env:
   VCPKG_ROOT: ${{ github.workspace }}/vcpkg
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+  VCPKG_COMMIT: "00d9442575c9f66ce33eb29faadef341cb4cefda"
+  VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/.vcpkg-cache
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -30,20 +31,24 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
 
-      - name: Export GitHub Actions cache env vars for vcpkg
-        uses: actions/github-script@v7
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v4
         with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-
+            vcpkg-${{ runner.os }}-gcc14-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
 
       - name: Configure
-        run: cmake --preset ci
+        run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          cmake --preset ci
         env:
           CC: gcc-14
           CXX: g++-14
@@ -68,20 +73,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang-19
 
-      - name: Export GitHub Actions cache env vars for vcpkg
-        uses: actions/github-script@v7
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v4
         with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-
+            vcpkg-${{ runner.os }}-clang19-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
 
       - name: Configure
-        run: cmake --preset ci
+        run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          cmake --preset ci
         env:
           CC: clang-19
           CXX: clang++-19
@@ -98,20 +107,24 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Export GitHub Actions cache env vars for vcpkg
-        uses: actions/github-script@v7
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v4
         with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-${{ runner.os }}-appleclang-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-appleclang-${{ env.VCPKG_COMMIT }}-
+            vcpkg-${{ runner.os }}-appleclang-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
 
       - name: Configure
-        run: cmake --preset ci
+        run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          cmake --preset ci
 
       - name: Build
         run: cmake --build --preset ci
@@ -130,20 +143,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang-19
 
-      - name: Export GitHub Actions cache env vars for vcpkg
-        uses: actions/github-script@v7
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v4
         with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-
+            vcpkg-${{ runner.os }}-clang19-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
 
       - name: Configure
-        run: cmake --preset asan
+        run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          cmake --preset asan
         env:
           CC: clang-19
           CXX: clang++-19
@@ -165,20 +182,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-14 g++-14 valgrind
 
-      - name: Export GitHub Actions cache env vars for vcpkg
-        uses: actions/github-script@v7
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v4
         with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-gcc14-${{ env.VCPKG_COMMIT }}-
+            vcpkg-${{ runner.os }}-gcc14-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
 
       - name: Configure
-        run: cmake --preset valgrind
+        run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          cmake --preset valgrind
         env:
           CC: gcc-14
           CXX: g++-14
@@ -200,20 +221,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang-19 clang-tidy-19
 
-      - name: Export GitHub Actions cache env vars for vcpkg
-        uses: actions/github-script@v7
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v4
         with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-clang19-${{ env.VCPKG_COMMIT }}-
+            vcpkg-${{ runner.os }}-clang19-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: "00d9442575c9f66ce33eb29faadef341cb4cefda"
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT }}
 
       - name: Configure
-        run: cmake --preset dev
+        run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          cmake --preset dev
         env:
           CC: clang-19
           CXX: clang++-19
