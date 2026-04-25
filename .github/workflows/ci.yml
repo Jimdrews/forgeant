@@ -12,6 +12,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   VCPKG_COMMIT: "00d9442575c9f66ce33eb29faadef341cb4cefda"
   VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/.vcpkg-cache
+  VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg-cache,readwrite"
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
